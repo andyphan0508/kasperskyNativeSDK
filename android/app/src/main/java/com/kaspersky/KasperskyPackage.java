@@ -31,6 +31,6 @@ public class KasperskyPackage implements ReactPackage {
     public List<ViewManager> createViewManagers(@NonNull ReactApplicationContext reactApplicationContext) {
         return Collections.emptyList();
     }
-
+    
 
 }

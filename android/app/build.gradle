@@ -103,10 +103,22 @@ android {
         }
     }
 }
-
+repositories {
+    flatDir {
+        dirs 'src/libs'  // Ensure this points to the directory containing your AAR
+    }
+}
 dependencies {
+
+    // Implementing react-native AAR Library
+    implementation(name: 'KL_Mobile_SDK_Android_5.18.0.215_AvRelease', ext: 'aar')
+//    implementation(name: 'KL_Mobile_SDK_Android_5.18.0.215_FullRelease', ext: 'aar')
+    implementation(name: 'KL_Base_SDK_Android_5.18.0.215_Release', ext: 'aar')
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

@@ -1,4 +1,4 @@
-package com.kaspersky;
+package com.kasperskyRoot;
 
 import androidx.annotation.NonNull;
 
@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 @UnstableReactNativeAPI
-public class KasperskyPackage implements ReactPackage {
+public class RootPackage implements ReactPackage {
 
     @NonNull
     @Override
@@ -21,7 +21,7 @@ public class KasperskyPackage implements ReactPackage {
             @NonNull ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
 
-        modules.add(new KasperskyModule(reactContext));
+        modules.add(new RootModule(reactContext));
 
         return modules;
     }

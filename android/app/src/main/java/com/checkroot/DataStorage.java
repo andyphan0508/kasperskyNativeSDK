@@ -1,6 +1,8 @@
 package com.checkroot;
 
-import com.kaspersky.KasperskyModule;
+import android.content.Context;
+
+import com.kasperskyRoot.RootModule;
 import com.kavsdk.securestorage.file.CryptoFileInputStream;
 import com.kavsdk.securestorage.file.CryptoFileOutputStream;
 import com.kavsdk.shared.iface.ServiceState;
@@ -35,13 +37,14 @@ public class DataStorage implements ServiceStateStorage {
     /* File names of particular data storages */
     private static final String[] STORAGE_DATA_FILES = new String[]{"wcs", "wes", "wss", "secsms", "sdk", "as", "simwatch", "appcontrol"};
 
-    private final KasperskyModule mContext;
+    private final Context mContext;
     private int mStorageMode;
 
-    public DataStorage(KasperskyModule context, int mode) {
+    public DataStorage(Context context, int mode) {
         mContext = context;
         mStorageMode = mode;
     }
+
 
     @Override
     public void write(ServiceState state) throws IOException {

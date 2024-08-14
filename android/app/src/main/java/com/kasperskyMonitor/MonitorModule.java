@@ -1,6 +1,8 @@
-package com.kaspersky;
+package com.kasperskyMonitor;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -10,13 +12,15 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.kavsdk.antivirus.Antivirus;
+import com.kavsdk.antivirus.AntivirusInstance;
 import com.kavsdk.license.SdkLicenseViolationException;
 import com.kavsdk.rootdetector.RootDetector;
 
 import java.io.File;
+import java.io.IOException;
 
 
-public class KasperskyModule extends ReactContextBaseJavaModule implements SdkInitListener {
+public class MonitorModule extends ReactContextBaseJavaModule implements SdkInitListener {
 
     private static final String TAG = "EasyScanner";
     // Create thread for processing
@@ -25,50 +29,59 @@ public class KasperskyModule extends ReactContextBaseJavaModule implements SdkIn
     private Antivirus mAntivirusComponent;
 
 
-    KasperskyModule(ReactApplicationContext context) {
+    MonitorModule(ReactApplicationContext context) {
         super(context);
     }
 
     @NonNull
     @Override
     public String getName() {
-        return "KasperskySDK";
+        return "KasperskyMonitorSDK";
+    }
+
+    @ReactMethod
+    public void displayName() {
+        Log.d("Note: ", "Kaspersky Scanner is ready to run");
+    }
+
+    @Override
+    @ReactMethod
+    public void onCreate() {
+        Log.i(TAG, "Check scanner sampling started");
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final Context context = getReactApplicationContext().getApplicationContext();
+                try {
+                    initializeSdk(context, MonitorModule.this);
+                } catch (SdkLicenseViolationException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
     }
 
 
-    @ReactMethod
-    public String displayName(String string) {
-        Log.d("Note: ", "Kaspersky is ready to run");
-        return string;
-    }
-
-    /**
-     * CHECK ROOT MODULE:
-     * This system represent the module connecting the device, checking for root
-     * and device is rooted or not
-     **/
-    /**
-     * Initialize the SDK
-     */
 
     @ReactMethod
-    public void initializeSdk(Context context, SdkInitListener listener) {
+    public void initializeSdk(Context context, SdkInitListener listener) throws SdkLicenseViolationException, IOException {
         Log.i(TAG, "SDK initialization started");
-        final File basesPath = getDir("bases", Context.MODE_PRIVATE);
+        /** CHECK LICENSE: Dev mode need to re-initialize */
 
-        try {
-            mSdkInitStatus = InitStatus.Inited;
-            Log.i(TAG, "SDK initialized successfully");
-            listener.onInitSuccess();
-        } catch (Exception e) {
-            mSdkInitStatus = InitStatus.NotInited;
-            Log.e(TAG, "SDK initialization failed", e);
-            listener.onInitFailure(e.getMessage());
-        }
+        mAntivirusComponent = AntivirusInstance.getInstance();
+
+        File scanTempDir = getDir("scan_temp", Context.MODE_PRIVATE);
+        File monitorTempDir = getDir("monitor_temp", Context.MODE_PRIVATE);
+        mAntivirusComponent.initAntivirus(getReactApplicationContext().getApplicationContext(), scanTempDir.getAbsolutePath(), monitorTempDir.getAbsolutePath());
+        mSdkInitStatus = InitStatus.InitedSuccesfully;
+        listener.onSdkInitialized();
     }
 
     public File getDir(String bases, int modePrivate) {
-        return null;
+        return new File(bases);
     }
 
 
@@ -97,20 +110,6 @@ public class KasperskyModule extends ReactContextBaseJavaModule implements SdkIn
 
     }
 
-    @Override
-    @ReactMethod
-    public void onCreate() {
-        Log.i(TAG, "Sample application started");
-        boolean listener;
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final Context context = getReactApplicationContext().getApplicationContext();
-                // Perform operations
-            }
-        }).start();
-    }
 
     @Override
     public void onInitSuccess() {
@@ -138,5 +137,16 @@ public class KasperskyModule extends ReactContextBaseJavaModule implements SdkIn
                     initStatus != InitedSuccesfully;
         }
     }
+
+    /** Constructor of getNativeLibsPath() */
+    public String getNativeLibsPath() {
+        try {
+            PackageInfo packageInfo = getCurrentActivity().getPackageManager().getPackageInfo(getCurrentActivity().getPackageName(), 0);
+            return packageInfo.applicationInfo.nativeLibraryDir;
+        } catch (PackageManager.NameNotFoundException error) {
+            throw new RuntimeException(error);
+        }
+    }
+
 
 }

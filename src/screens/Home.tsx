@@ -1,13 +1,23 @@
 import {View, Text, NativeModules} from 'react-native';
 import React from 'react';
+import CheckRoot from '../components/Scanner';
 
 const Home = () => {
   const {KasperskyRootSDK, KasperskyScannerSDK} = NativeModules;
 
-  console.log(KasperskyRootSDK.onCreate());
+  // console.log(KasperskyRootSDK?.onCreate());
   return (
     <View>
-      <Text>Home</Text>
+      <Text
+        style={{
+          fontSize: 30,
+          color: 'navy',
+          fontWeight: '500',
+          padding: 8,
+        }}>
+        React Native SDK Test
+      </Text>
+      <CheckRoot />
     </View>
   );
 };

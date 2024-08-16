@@ -6,12 +6,17 @@ import android.content.pm.PackageManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.checkroot.DataStorage;
 import com.checkroot.SdkInitListener;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.kavsdk.KavSdk;
 import com.kavsdk.antivirus.Antivirus;
 import com.kavsdk.antivirus.AntivirusInstance;
@@ -51,22 +56,24 @@ public class RootModule extends ReactContextBaseJavaModule implements SdkInitLis
         return string;
     }
 
-    @Override
+
     @ReactMethod
     public void onCreate() {
         Log.i(TAG, "Check root sampling started");
-
-        new Thread(() -> {
+        Thread thread = new Thread(() -> {
             final Context context = Objects.requireNonNull(getCurrentActivity().getApplicationContext());
             System.out.println("Root module" + RootModule.this + "Context" + context);
             try {
                 initializeSdk(context, RootModule.this);
+                onSdkInitialized();
             } catch (SdkLicenseViolationException e) {
                 throw new RuntimeException(e);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }).start();
+        });
+        thread.start();
+
     }
 
     @Override
@@ -76,34 +83,33 @@ public class RootModule extends ReactContextBaseJavaModule implements SdkInitLis
 
     @ReactMethod
     public void onSdkInitialized() {
+
         Log.i("Root checking", "Root checking init");
         scannerThread = new Thread() {
             public void run() {
                 try {
                     final boolean isRootedDevice = RootDetector.getInstance().checkRoot();
                     Log.i(TAG, "Is Rooted Device: " + (isRootedDevice ? "YES" : "NO"));
+                    sendEvent(getReactApplicationContext(), "EventName", isRootedDevice);
                 } catch (SdkLicenseViolationException error) {
                     Log.e(TAG, "Check is device rooted failed due to license violation: " + error.getMessage());
                 }
             }
         };
         scannerThread.start();
-
     }
 
     @Override
     public void onInitSuccess() {
-
     }
 
     @Override
     public void onInitFailure(String message) {
-
     }
 
 
     @ReactMethod
-    public void initializeSdk(Context context, SdkInitListener listener) throws SdkLicenseViolationException, IOException {
+    public String initializeSdk(Context context, SdkInitListener listener) throws SdkLicenseViolationException, IOException {
 
         Log.i(TAG, "SDK initialization started");
         final File basesPath = getCurrentActivity().getApplicationContext().getDir("bases", Context.MODE_PRIVATE);
@@ -129,7 +135,7 @@ public class RootModule extends ReactContextBaseJavaModule implements SdkInitLis
         if (!license.isValid()) {
             mSdkInitStatus = InitStatus.NeedNewLicenseCode;
             listener.onInitializationFailed("New license code is required");
-            return;
+            return null;
         }
 
 
@@ -143,15 +149,16 @@ public class RootModule extends ReactContextBaseJavaModule implements SdkInitLis
         } catch (SdkLicenseViolationException e) {
             mSdkInitStatus = InitStatus.InitFailed;
             listener.onInitializationFailed(e.getMessage());
-            return;
+            return null;
         } catch (IOException ioe) {
             mSdkInitStatus = InitStatus.InitFailed;
             listener.onInitializationFailed(ioe.getMessage());
-            return;
+            return null;
         }
 
         mSdkInitStatus = InitStatus.InitedSuccesfully;
         listener.onSdkInitialized();
+        return null;
     };
 
         private enum InitStatus {
@@ -183,4 +190,22 @@ public class RootModule extends ReactContextBaseJavaModule implements SdkInitLis
             throw new RuntimeException(e);
         }
     }
+
+    @ReactMethod
+    public void addListener(String eventName) {
+        // React Native will manage listeners through JavaScript
     }
+
+    @ReactMethod
+    public void removeListeners(Integer count) {
+        // React Native will manage removal of listeners through JavaScript
+    }
+
+    private void sendEvent(ReactContext reactContext, String eventName, @Nullable boolean message) {
+        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(eventName, message);
+    }
+
+
+
+}

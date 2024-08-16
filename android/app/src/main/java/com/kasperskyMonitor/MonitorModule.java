@@ -1,5 +1,6 @@
 package com.kasperskyMonitor;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -22,7 +23,7 @@ import java.io.IOException;
 
 public class MonitorModule extends ReactContextBaseJavaModule implements SdkInitListener {
 
-    private static final String TAG = "EasyScanner";
+    private static final String TAG = "APP_MONITOR_SAMPLE";
     // Create thread for processing
     private Thread scannerThread;
     private volatile InitStatus mSdkInitStatus = InitStatus.NotInited;
@@ -49,17 +50,14 @@ public class MonitorModule extends ReactContextBaseJavaModule implements SdkInit
     public void onCreate() {
         Log.i(TAG, "Check scanner sampling started");
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final Context context = getReactApplicationContext().getApplicationContext();
-                try {
-                    initializeSdk(context, MonitorModule.this);
-                } catch (SdkLicenseViolationException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+        new Thread(() -> {
+            final Context context = getReactApplicationContext().getApplicationContext();
+            try {
+                initializeSdk(context, MonitorModule.this);
+            } catch (SdkLicenseViolationException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }).start();
     }
@@ -72,17 +70,14 @@ public class MonitorModule extends ReactContextBaseJavaModule implements SdkInit
         /** CHECK LICENSE: Dev mode need to re-initialize */
 
         mAntivirusComponent = AntivirusInstance.getInstance();
-
-        File scanTempDir = getDir("scan_temp", Context.MODE_PRIVATE);
-        File monitorTempDir = getDir("monitor_temp", Context.MODE_PRIVATE);
+        Application application = new Application();
+        File scanTempDir = application.getDir("scan_temp", Context.MODE_PRIVATE);
+        File monitorTempDir = application.getDir("monitor_temp", Context.MODE_PRIVATE);
         mAntivirusComponent.initAntivirus(getReactApplicationContext().getApplicationContext(), scanTempDir.getAbsolutePath(), monitorTempDir.getAbsolutePath());
         mSdkInitStatus = InitStatus.InitedSuccesfully;
         listener.onSdkInitialized();
     }
 
-    public File getDir(String bases, int modePrivate) {
-        return new File(bases);
-    }
 
 
     public void onInitializationFailed(final String reason) {

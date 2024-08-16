@@ -1,16 +1,27 @@
-import {StyleSheet, Text, View, NativeModules} from 'react-native';
+import {
+  NativeEventEmitter,
+  StyleSheet,
+  Text,
+  View,
+  NativeModules,
+} from 'react-native';
 import React from 'react';
 
 const CheckRoot = () => {
   const {KasperskyRootSDK} = NativeModules;
+  const logEmitter = new NativeEventEmitter(KasperskyRootSDK);
 
+  console.log('KasperskyRootSDK', KasperskyRootSDK.onSdkInitialized());
+
+  console.log(
+    'Log',
+    logEmitter?.addListener('onLogMessage', ({message}: {message: string}) => {
+      console.log('Received log message from native:', message);
+    }),
+  );
   const onCheckRoot = () => {
     try {
-      const response = KasperskyRootSDK?.onSdkInitialized();
-      console.log('response', response);
-      if (response?.isRooted) {
-        return false;
-      }
+      const response = KasperskyRootSDK?.onCreate();
     } catch (error) {
       return false;
       console.error(error);

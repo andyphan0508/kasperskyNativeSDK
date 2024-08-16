@@ -1,20 +1,35 @@
 package com.kasperskyScanner;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.checkroot.SdkInitListener;
+import com.easyscanner.AvCompletedListener;
+import com.easyscanner.DataStorage;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.kavsdk.KavSdk;
 import com.kavsdk.antivirus.Antivirus;
 import com.kavsdk.antivirus.AntivirusInstance;
+import com.kavsdk.antivirus.easyscanner.EasyMode;
+import com.kavsdk.antivirus.easyscanner.EasyResult;
+import com.kavsdk.antivirus.easyscanner.EasyScanner;
+import com.kavsdk.license.SdkLicense;
+import com.kavsdk.license.SdkLicenseDateTimeException;
+import com.kavsdk.license.SdkLicenseException;
+import com.kavsdk.license.SdkLicenseNetworkException;
 import com.kavsdk.license.SdkLicenseViolationException;
 import com.kavsdk.rootdetector.RootDetector;
+import com.kavsdk.shared.iface.ServiceStateStorage;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,12 +37,13 @@ import java.io.IOException;
 
 public class ScannerModule extends ReactContextBaseJavaModule implements SdkInitListener {
 
-    private static final String TAG = "EasyScanner";
+    private static final String TAG = "EASY_SCANNER_EXAMPLE";
     // Create thread for processing
     private Thread scannerThread;
     private volatile InitStatus mSdkInitStatus = InitStatus.NotInited;
     private Antivirus mAntivirusComponent;
-
+    private Thread mScanThread;
+    private AvCompletedListener mAvCompletedListener;
 
     ScannerModule(ReactApplicationContext context) {
         super(context);
@@ -47,14 +63,14 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
     @Override
     @ReactMethod
     public void onCreate() {
-        Log.i(TAG, "Check root sampling started");
-
+        Log.i(TAG, "Scanner sampling started");
         new Thread(new Runnable() {
             @Override
             public void run() {
                 final Context context = getReactApplicationContext().getApplicationContext();
                 try {
                     initializeSdk(context, ScannerModule.this);
+                    onSdkInitialized();
                 } catch (SdkLicenseViolationException e) {
                     throw new RuntimeException(e);
                 } catch (IOException e) {
@@ -66,46 +82,62 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
 
 
     @ReactMethod
-    public String displayName(String string) {
-        Log.d("Note: ", "Kaspersky is ready to run");
-        return string;
-    }
-
-    /**
-     * CHECK ROOT MODULE:
-     * This system represent the module connecting the device, checking for root
-     * and device is rooted or not
-     **/
-    /**
-     * Initialize the SDK
-     */
-
-    @ReactMethod
     public void initializeSdk(Context context, SdkInitListener listener) throws SdkLicenseViolationException, IOException {
-        Log.i(TAG, "SDK initialization started");
-        /** CHECK LICENSE: Dev mode need to re-initialize */
+
+        Application application = new Application();
+        final File basesPath = application.getDir("bases", Context.MODE_PRIVATE);
+        ServiceStateStorage generalStorage  = new DataStorage(getCurrentActivity().getApplicationContext(), DataStorage.GENERAL_SETTINGS_STORAGE);
+
+        try {
+            KavSdk.initSafe(getCurrentActivity().getApplicationContext(), basesPath, generalStorage, getNativeLibsPath());
+
+            final SdkLicense license = KavSdk.getLicense();
+            if (!license.isValid()) {
+                if (!license.isClientUserIDRequired()) {
+                    license.activate(null);
+                }
+            }
+
+        } catch (SdkLicenseNetworkException | SdkLicenseDateTimeException | IOException e) {
+            mSdkInitStatus = InitStatus.InitFailed;
+            listener.onInitializationFailed("Init failure: " + e.getMessage());
+            return;
+        } catch (SdkLicenseException e) {
+            mSdkInitStatus = InitStatus.NeedNewLicenseCode;
+            listener.onInitializationFailed("New license code is required: " + e.getMessage());
+            return;
+        }
+
+        SdkLicense license = KavSdk.getLicense();
+        if (!license.isValid()) {
+            mSdkInitStatus = InitStatus.NeedNewLicenseCode;
+            listener.onInitializationFailed("New license code is required");
+            return;
+        }
 
         mAntivirusComponent = AntivirusInstance.getInstance();
 
-        File scanTempDir = getDir("scan_temp", Context.MODE_PRIVATE);
-        File monitorTempDir = getDir("monitor_temp", Context.MODE_PRIVATE);
-        mAntivirusComponent.initAntivirus(getReactApplicationContext().getApplicationContext(), scanTempDir.getAbsolutePath(), monitorTempDir.getAbsolutePath());
-//        try {
-//            mAntivirusComponent.initAntivirus(getReactApplicationContext().getApplicationContext(), scanTempDir.getAbsolutePath(), monitorTempDir.getAbsolutePath());
-//        } catch (SdkLicenseViolationException e) {
-//            mSdkInitStatus = InitStatus.InitFailed;
-//            listener.onInitializationFailed(e.getMessage());
-//        } catch (IOException ioe) {
-//            mSdkInitStatus = InitStatus.InitFailed;
-//            listener.onInitializationFailed(ioe.getMessage());
-//        }
+        File scanTmpDir = application.getDir("scan_tmp", Context.MODE_PRIVATE);
+        File monitorTmpDir = application.getDir("monitor_tmp", Context.MODE_PRIVATE);
+
+        try {
+            mAntivirusComponent.initAntivirus(getCurrentActivity().getApplicationContext(),
+                    scanTmpDir.getAbsolutePath(), monitorTmpDir.getAbsolutePath());
+
+        } catch (SdkLicenseViolationException e) {
+            mSdkInitStatus = InitStatus.InitFailed;
+            listener.onInitializationFailed(e.getMessage());
+            return;
+        } catch (IOException ioe) {
+            mSdkInitStatus = InitStatus.InitFailed;
+            listener.onInitializationFailed(ioe.getMessage());
+            return;
+        }
+
         mSdkInitStatus = InitStatus.InitedSuccesfully;
         listener.onSdkInitialized();
     }
 
-    public File getDir(String bases, int modePrivate) {
-        return new File(bases);
-    }
 
 
     public void onInitializationFailed(final String reason) {
@@ -114,29 +146,55 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
 
     @ReactMethod
     public void onSdkInitialized() {
-        Log.i("Root checking", "Root checking init");
-        scannerThread = new Thread() {
+        Log.i(TAG, "EasyScanner started");
+
+        mScanThread = new Thread() {
+            @Override
             public void run() {
-                try {
-                    final boolean isRootedDevice = RootDetector.getInstance().checkRoot();
-                    Log.i(TAG, "Is Rooted Device: " + (isRootedDevice ? "YES" : "NO"));
-                } catch (SdkLicenseViolationException error) {
-                    Log.e(TAG, "Check is device rooted failed due to license violation: " + error.getMessage());
+                EasyScanner easyScanner = mAntivirusComponent.createEasyScanner();
+                easyScanner.scan(EasyMode.Basic);
+                final EasyResult result = easyScanner.getResult();
+
+                Log.d(TAG, "Scan finished ");
+                Log.d(TAG, "- Files found: "         + result.getFilesScanned());
+                Log.d(TAG, "- Files calculated: "    + result.getFilesCount());
+                Log.d(TAG, "- Objects scanned: "     + result.getObjectsScanned());
+                Log.d(TAG, "- Objects skipped: "     + result.getObjectsSkipped());
+                Log.d(TAG, "- Viruses found: "       + result.getMalwareList().size());
+                Log.d(TAG, "- Riskware found: "      + result.getRiskwareList().size());
+                Log.d(TAG, "- Rooted: "              + result.isRooted());
+
+                if (mAvCompletedListener != null) {
+                    mAvCompletedListener.onAvCompleted("Scan complete!\n\n"
+                            + "- Files found: "      + result.getFilesScanned() + "\n"
+                            + "- Files calculated: " + result.getFilesCount() + "\n"
+                            + "- Objects scanned: "  + result.getObjectsScanned() + "\n"
+                            + "- Objects skipped: "  + result.getObjectsSkipped() + "\n"
+                            + "- Viruses found: "    + result.getMalwareList().size() + "\n"
+                            + "- Riskware found: "   + result.getRiskwareList().size() + "\n"
+                            + "- Rooted: "           + (result.isRooted() ? "YES" : "NO"));
                 }
+                Log.i(TAG, "EasyScanner finished");
             }
         };
-        if (scannerThread != null) {
-            scannerThread.start();
-        } else {
-            Log.e("Point error", "Thread instance is null");
-        }
-
+        mScanThread.start();
     }
 
 
     @Override
     public void onInitSuccess() {
 
+    }
+
+    // AddListener and removeListeners are required for event subscription in RN
+    @ReactMethod
+    public void addListener(String eventName) {
+        // React Native will manage listeners through JavaScript
+    }
+
+    @ReactMethod
+    public void removeListeners(Integer count) {
+        // React Native will manage removal of listeners through JavaScript
     }
 
     @Override
@@ -169,6 +227,12 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
         } catch (PackageManager.NameNotFoundException error) {
             throw new RuntimeException(error);
         }
+    }
+
+    // Method to send log messages to JS via event emitter
+    private void sendEvent(ReactContext reactContext, String eventName, @Nullable boolean message) {
+        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(eventName, message);
     }
 
 

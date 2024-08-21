@@ -34,7 +34,6 @@ import java.util.Objects;
 public class RootModule extends ReactContextBaseJavaModule implements SdkInitListener {
 
     private static final String TAG = "CHECK_ROOT_EXAMPLE";
-    // Create thread for processing
     private volatile InitStatus mSdkInitStatus = InitStatus.NotInited;
     private Antivirus mAntivirusComponent;
     private Thread scannerThread;
@@ -62,7 +61,6 @@ public class RootModule extends ReactContextBaseJavaModule implements SdkInitLis
         Log.i(TAG, "Check root sampling started");
         Thread thread = new Thread(() -> {
             final Context context = Objects.requireNonNull(getCurrentActivity().getApplicationContext());
-            System.out.println("Root module" + RootModule.this + "Context" + context);
             try {
                 initializeSdk(context, RootModule.this);
                 onSdkInitialized();
@@ -83,14 +81,13 @@ public class RootModule extends ReactContextBaseJavaModule implements SdkInitLis
 
     @ReactMethod
     public void onSdkInitialized() {
-
         Log.i("Root checking", "Root checking init");
         scannerThread = new Thread() {
             public void run() {
                 try {
                     final boolean isRootedDevice = RootDetector.getInstance().checkRoot();
                     Log.i(TAG, "Is Rooted Device: " + (isRootedDevice ? "YES" : "NO"));
-                    sendEvent(getReactApplicationContext(), "EventName", isRootedDevice);
+                    sendEvent(getReactApplicationContext(), "CheckRoot", isRootedDevice);
                 } catch (SdkLicenseViolationException error) {
                     Log.e(TAG, "Check is device rooted failed due to license violation: " + error.getMessage());
                 }
@@ -201,11 +198,11 @@ public class RootModule extends ReactContextBaseJavaModule implements SdkInitLis
         // React Native will manage removal of listeners through JavaScript
     }
 
+    /** This function is to return the event for React Native to catch
+     * and export the function */
     private void sendEvent(ReactContext reactContext, String eventName, @Nullable boolean message) {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit(eventName, message);
     }
-
-
 
 }

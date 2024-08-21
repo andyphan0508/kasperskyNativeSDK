@@ -4,6 +4,7 @@ import {
   Text,
   View,
   NativeModules,
+  DeviceEventEmitter
 } from 'react-native';
 import React from 'react';
 
@@ -11,14 +12,12 @@ const CheckRoot = () => {
   const {KasperskyRootSDK} = NativeModules;
   const logEmitter = new NativeEventEmitter(KasperskyRootSDK);
 
-  console.log('KasperskyRootSDK', KasperskyRootSDK.onSdkInitialized());
+  React.useEffect(() => {
+    DeviceEventEmitter.addListener("CheckRoot", data => {
+      console.log(data)
+    })
+  }, [])
 
-  console.log(
-    'Log',
-    logEmitter?.addListener('onLogMessage', ({message}: {message: string}) => {
-      console.log('Received log message from native:', message);
-    }),
-  );
   const onCheckRoot = () => {
     try {
       const response = KasperskyRootSDK?.onCreate();

@@ -7,11 +7,14 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "bob build"
   },
   "dependencies": {
+    "create-react-native-library": "^0.41.0",
     "react": "18.2.0",
-    "react-native": "0.74.5"
+    "react-native": "0.74.5",
+    "react-native-builder-bob": "^0.30.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
@@ -27,10 +30,53 @@
     "eslint": "^8.19.0",
     "jest": "^29.6.3",
     "prettier": "2.8.8",
+    "react-native-builder-bob": "^0.30.0",
     "react-test-renderer": "18.2.0",
     "typescript": "5.0.4"
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "source": "./index.js",
+  "main": "./modules\\commonjs\\index.js",
+  "module": "./modules\\module\\index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "default": "./modules\\module\\index.js"
+      },
+      "require": {
+        "default": "./modules\\commonjs\\index.js"
+      }
+    }
+  },
+  "files": [
+    ".",
+    "modules",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__"
+  ],
+  "react-native-builder-bob": {
+    "source": ".",
+    "output": "modules",
+    "targets": [
+      [
+        "commonjs",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ]
+    ]
+  },
+  "eslintIgnore": [
+    "node_modules/",
+    "modules/"
+  ]
 }

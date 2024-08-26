@@ -1,0 +1,14 @@
+{
+  "name": "react-native-root-module",
+  "version": "0.0.0",
+  "description": "Create the react native root scanning module using the KasperskyModule",
+  "main": "src/index",
+  "author": " <> ()",
+  "license": "UNLICENSED",
+  "homepage": "#readme",
+  "create-react-native-library": {
+    "type": "module-legacy",
+    "languages": "kotlin-objc",
+    "version": "0.41.0"
+  }
+}

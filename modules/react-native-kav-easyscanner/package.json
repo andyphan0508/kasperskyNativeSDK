@@ -1,0 +1,14 @@
+{
+  "name": "react-native-kav-easyscanner",
+  "version": "0.0.0",
+  "description": "The basic function for easy scanning mode",
+  "main": "src/index",
+  "author": " <> ()",
+  "license": "UNLICENSED",
+  "homepage": "#readme",
+  "create-react-native-library": {
+    "type": "module-legacy",
+    "languages": "kotlin-objc",
+    "version": "0.41.0"
+  }
+}

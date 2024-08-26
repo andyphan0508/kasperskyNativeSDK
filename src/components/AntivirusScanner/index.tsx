@@ -1,22 +1,26 @@
 import { StyleSheet, Text, View, Button } from 'react-native';
 import React from 'react';
 
-import kasperskyRootCheck from 'react-native-root-module';
+import kasperskyEasyScanner from 'react-native-kav-easyscanner';
 
 const AntivirusChecker = () => {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [isRooted, setIsRooted] = React.useState(false);
+  const [isResult, setIsResult] = React.useState<any>();
 
   const onPress = async () => {
     try {
       setIsLoading(true);
-      const isRooted = await kasperskyRootCheck();
-      setIsRooted(isRooted);
+      const result = await kasperskyEasyScanner();
+      //   setIsRooted(isRooted);
+
+      setIsResult(result);
       setIsLoading(false);
     } catch (error) {
       console.error(error);
     }
   };
+
+  console.log(isResult?.map?.((item: string) => item));
 
   return (
     <View style={styles.container}>
@@ -29,21 +33,21 @@ const AntivirusChecker = () => {
         </Text>
         <View>
           <Button title="Press here to scan" onPress={onPress} />
-          {isLoading ? (
-            <View>
-              <Text>Loading</Text>
-            </View>
-          ) : (
-            <View>
-              <Text>
-                {isRooted === true
-                  ? 'This device is rooted'
-                  : 'This device is not rooted'}
-              </Text>
-            </View>
-          )}
         </View>
       </View>
+      {isLoading ? (
+        <View>
+          <Text>Loading</Text>
+        </View>
+      ) : (
+        <View>
+          {isResult?.map?.((item: string) => (
+            <View>
+              <Text>{item}</Text>
+            </View>
+          ))}
+        </View>
+      )}
     </View>
   );
 };

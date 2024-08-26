@@ -1,6 +1,7 @@
 import { View, Text, NativeModules } from 'react-native';
 import React from 'react';
-import CheckRoot from '../components/Scanner';
+import CheckRoot from '../components/RootScanner';
+import AntivirusChecker from '../components/AntivirusScanner';
 
 const Home = () => {
   // console.log(KasperskyRootSDK?.onCreate());
@@ -16,6 +17,7 @@ const Home = () => {
         React Native SDK Test
       </Text>
       <CheckRoot />
+      <AntivirusChecker />
     </View>
   );
 };

@@ -12,8 +12,9 @@
   "dependencies": {
     "react": "18.2.0",
     "react-native": "0.74.5",
-    "react-native-root-module": "file:./modules\\react-native-root-module",
-    "react-native-kav-easyscanner": "file:./modules\\react-native-kav-easyscanner"
+    "react-native-kav-easyscanner": "file:./modules\\react-native-kav-easyscanner",
+    "react-native-paper": "^5.12.5",
+    "react-native-root-module": "file:./modules\\react-native-root-module"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -4,7 +4,6 @@ import CheckRoot from '../components/RootScanner';
 import AntivirusChecker from '../components/AntivirusScanner';
 
 const Home = () => {
-  // console.log(KasperskyRootSDK?.onCreate());
   return (
     <View>
       <Text

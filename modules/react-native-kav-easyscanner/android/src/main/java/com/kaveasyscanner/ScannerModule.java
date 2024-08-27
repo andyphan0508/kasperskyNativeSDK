@@ -64,8 +64,10 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
         Log.d("Note: ", "Kaspersky Scanner is ready to run");
 
     }
+
+
     @ReactMethod
-    public void onCreate() {
+    public void onCreate(String mode) {
         Log.i(TAG, "Scanner sampling started");
         new Thread(new Runnable() {
             @Override
@@ -73,7 +75,7 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
                 final Context context = getReactApplicationContext().getApplicationContext();
                 try {
                     initializeSdk(context, ScannerModule.this);
-                    onSdkInitialized();
+                    onSdkInitialized(mode);
                 } catch (SdkLicenseViolationException e) {
                     throw new RuntimeException(e);
                 } catch (IOException e) {
@@ -147,15 +149,21 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
         Log.e(TAG, "SDK initialization status=" + mSdkInitStatus + ", reason=" + reason);
     }
 
-    @ReactMethod
+    @Override
     public void onSdkInitialized() {
+
+    }
+
+
+    @ReactMethod
+    public void onSdkInitialized(String mode) {
         Log.i(TAG, "EasyScanner started");
 
         mScanThread = new Thread() {
             @Override
             public void run() {
                 EasyScanner easyScanner = mAntivirusComponent.createEasyScanner();
-                easyScanner.scan(EasyMode.Basic);
+                easyScanner.scan(EasyMode.valueOf(mode));
                 final EasyResult result = easyScanner.getResult();
 
                 Log.d(TAG, "Scan finished ");
@@ -168,22 +176,25 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
                 Log.d(TAG, "- Rooted: "              + result.isRooted());
 
 
+                // Export the RESULT
+                /** For the references for sending all as a full result */
                 WritableArray resultsArray = Arguments.createArray();
-                resultsArray.pushString("Files found: " + result.getFilesScanned());
-                resultsArray.pushString("Files calculated: " + result.getFilesCount());
-                resultsArray.pushString("Object found: " + result.getObjectsScanned());
-                resultsArray.pushString("Object skipped: "  + result.getObjectsSkipped());
-                resultsArray.pushString("Malware found: "  + result.getMalwareList().size());
-                resultsArray.pushString("Risk ware found: " + result.getRiskwareList().size());
+                resultsArray.pushString("Files found: "         + result.getFilesScanned());
+                resultsArray.pushString("Files calculated: "    + result.getFilesCount());
+                resultsArray.pushString("Object found: "        + result.getObjectsScanned());
+                resultsArray.pushString("Object skipped: "      + result.getObjectsSkipped());
+                resultsArray.pushString("Malware found: "       + result.getMalwareList().size());
+                resultsArray.pushString("Risk ware found: "     + result.getRiskwareList().size());
 
                 sendEvent(getReactApplicationContext(), "AllResult", resultsArray.toString());
 
-                sendEvent(getReactApplicationContext(), "FilesFound", String.valueOf(result.getFilesScanned()));
-                sendEvent(getReactApplicationContext(), "FilesCalculated", String.valueOf(result.getFilesCount()));
-                sendEvent(getReactApplicationContext(), "ObjectFound", String.valueOf(result.getObjectsScanned()));
-                sendEvent(getReactApplicationContext(), "ObjectSkipped", String.valueOf(result.getObjectsSkipped()));
-                sendEvent(getReactApplicationContext(), "VirusFound", String.valueOf(result.getMalwareList().size()));
-                sendEvent(getReactApplicationContext(), "VirusFound", String.valueOf(result.getRiskwareList().size()));
+                /** Send the exported result to each scanning success*/
+                sendEvent(getReactApplicationContext(), "FilesFound",       String.valueOf(result.getFilesScanned()));
+                sendEvent(getReactApplicationContext(), "FilesCalculated",  String.valueOf(result.getFilesCount()));
+                sendEvent(getReactApplicationContext(), "ObjectFound",      String.valueOf(result.getObjectsScanned()));
+                sendEvent(getReactApplicationContext(), "ObjectSkipped",    String.valueOf(result.getObjectsSkipped()));
+                sendEvent(getReactApplicationContext(), "VirusFound",       String.valueOf(result.getMalwareList().size()));
+                sendEvent(getReactApplicationContext(), "VirusFound",       String.valueOf(result.getRiskwareList().size()));
 
 
                 if (mAvCompletedListener != null) {

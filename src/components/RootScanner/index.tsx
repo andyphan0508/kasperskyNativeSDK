@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View, Button } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import React from 'react';
+import { Button, Text } from 'react-native-paper';
 
 import kasperskyRootCheck from 'react-native-root-module';
 
-const CheckRoot = () => {
+const CheckRoot: React.FC<any> = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isRooted, setIsRooted] = React.useState(false);
 
@@ -28,27 +29,31 @@ const CheckRoot = () => {
           Check root by Kaspersky
         </Text>
         <View>
-          <Button title="Press here to scan" onPress={onPress} />
-          {isLoading ? (
-            <View>
-              <Text>Loading</Text>
-            </View>
-          ) : (
-            <View>
-              <Text>
-                {isRooted === true
-                  ? 'This device is rooted'
-                  : 'This device is not rooted'}
-              </Text>
-            </View>
-          )}
+          <Button onPress={onPress} style={{ backgroundColor: 'lightgray' }}>
+            Press here to scan
+          </Button>
         </View>
+      </View>
+      <View>
+        {isLoading ? (
+          <View>
+            <Text>Loading</Text>
+          </View>
+        ) : (
+          <View>
+            <Text>
+              {isRooted === true
+                ? 'This device is rooted'
+                : 'This device is not rooted'}
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
 };
 
-export default CheckRoot;
+export default React.memo(CheckRoot);
 
 const styles = StyleSheet.create({
   container: {

@@ -4,6 +4,16 @@ import CheckRoot from '../components/RootScanner';
 import AntivirusChecker from '../components/AntivirusScanner';
 
 const Home = () => {
+  React.useEffect(() => {}, []);
+
+  const checkRoot = async () => {
+    try {
+      const result = await NativeModules.RootChecker.isRooted();
+      console.log('Root check result', result);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <View>
       <Text

@@ -14,6 +14,8 @@ import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
 import com.kasperskyMonitor.MonitorPackage
 
+import com.rootchecker.RootCheckerPackage; // add this import
+
 class MainApplication : Application(), ReactApplication {
 
     @OptIn(UnstableReactNativeAPI::class)
@@ -26,6 +28,7 @@ class MainApplication : Application(), ReactApplication {
                     // add(RootPackage());
                     // add(ScannerPackage());
                     add(MonitorPackage());
+                    add(RootCheckerPackage())
                 }
 
             override fun getJSMainModuleName(): String = "index"

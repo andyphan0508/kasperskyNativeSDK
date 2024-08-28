@@ -79,7 +79,7 @@ public class RootModule extends ReactContextBaseJavaModule implements SdkInitLis
     public void onInitializationFailed(final String reason) {
         Log.e(TAG, "SDK initialization status=" + mSdkInitStatus + ", reason=" + reason);
     }
-
+    
     @ReactMethod
     public void onSdkInitialized() {
         Log.i("Root checking", "Root checking init");

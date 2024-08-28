@@ -32,10 +32,11 @@ const AntivirusChecker: React.FC<any> = () => {
     }
   };
 
-  const onPressButton = (value: string) => (text: string) => {
-    setScanType(([text] = value));
+  const onSelectScanType = (value: string) => {
+    setScanType(value as ScanType);
   };
 
+  console.log('scanType', scanType);
   return (
     <View style={styles.container}>
       <Text style={{ color: '#000000', fontWeight: '500', fontSize: 20 }}>
@@ -51,27 +52,44 @@ const AntivirusChecker: React.FC<any> = () => {
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <RadioButton
             value="Basic"
-            onPress={() => onPressButton('Recommended')}
-            status="checked"
+            onPress={() => onSelectScanType('Basic')}
+            status={scanType === 'Basic' ? 'checked' : 'unchecked'}
           />
           <Text>Basic</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <RadioButton value="Full" />
+          <RadioButton
+            value="Full"
+            onPress={() => onSelectScanType('Full')}
+            status={scanType === 'Full' ? 'checked' : 'unchecked'}
+          />
           <Text>Full</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <RadioButton value="Recommended" />
+          <RadioButton
+            value="Recommended"
+            onPress={() => onSelectScanType('Recommended')}
+            status={scanType === 'Recommended' ? 'checked' : 'unchecked'}
+          />
           <Text>Recommended</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <RadioButton value="Light" />
+          <RadioButton
+            value="Light"
+            onPress={() => onSelectScanType('Light')}
+            status={scanType === 'Light' ? 'checked' : 'unchecked'}
+          />
           <Text>Light</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <RadioButton value="LightPlus" />
+          <RadioButton
+            value="LightPlus"
+            onPress={() => onSelectScanType('LightPlus')}
+            status={scanType === 'LightPlus' ? 'checked' : 'unchecked'}
+          />
           <Text>LightPlus</Text>
         </View>
+        <Text style={{ padding: 8, fontSize: 20 }}>{`Mode: ${scanType}`}</Text>
       </View>
       {error && (
         <View>

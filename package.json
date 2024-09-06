@@ -10,12 +10,13 @@
     "test": "jest"
   },
   "dependencies": {
+    "create-react-native-library": "^0.41.0",
     "react": "18.2.0",
     "react-native": "0.74.5",
     "react-native-kav-easyscanner": "file:./modules\\react-native-kav-easyscanner",
     "react-native-paper": "^5.12.5",
-    "react-native-root-checker": "^0.4.0",
-    "react-native-root-module": "file:./modules\\react-native-root-module"
+    "react-native-root-module": "file:./modules\\react-native-root-module",
+    "react-native-app-monitor": "file:./modules\\react-native-app-monitor"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

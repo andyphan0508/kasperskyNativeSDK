@@ -2,6 +2,7 @@ import { View, Text, NativeModules } from 'react-native';
 import React from 'react';
 import CheckRoot from '../components/RootScanner';
 import AntivirusChecker from '../components/AntivirusScanner';
+import AppMonitor from '../components/AppMonitor';
 
 const Home = () => {
   React.useEffect(() => {}, []);
@@ -27,6 +28,7 @@ const Home = () => {
       </Text>
       <CheckRoot />
       <AntivirusChecker />
+      <AppMonitor />
     </View>
   );
 };

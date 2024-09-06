@@ -1,0 +1,14 @@
+{
+  "name": "react-native-app-monitor",
+  "version": "0.0.0",
+  "description": "This modules create a simple React App Monitor Scanner for the device",
+  "main": "src/index",
+  "author": " <> ()",
+  "license": "UNLICENSED",
+  "homepage": "#readme",
+  "create-react-native-library": {
+    "type": "module-legacy",
+    "languages": "kotlin-objc",
+    "version": "0.41.0"
+  }
+}

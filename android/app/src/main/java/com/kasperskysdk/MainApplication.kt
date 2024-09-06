@@ -12,9 +12,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
-import com.kasperskyMonitor.MonitorPackage
 
-import com.rootchecker.RootCheckerPackage; // add this import
 
 class MainApplication : Application(), ReactApplication {
 
@@ -27,8 +25,7 @@ class MainApplication : Application(), ReactApplication {
                     // add(MyReactNativePackage())
                     // add(RootPackage());
                     // add(ScannerPackage());
-                    add(MonitorPackage());
-                    add(RootCheckerPackage())
+
                 }
 
             override fun getJSMainModuleName(): String = "index"

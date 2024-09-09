@@ -85,7 +85,7 @@ public class MonitorModule extends ReactContextBaseJavaModule implements SdkInit
     }
 
     @ReactMethod
-    public void onSdkInitialized() {
+    public boolean onSdkInitialized() {
         Log.i("Root checking", "Root checking init");
         scannerThread = new Thread() {
             public void run() {
@@ -103,6 +103,7 @@ public class MonitorModule extends ReactContextBaseJavaModule implements SdkInit
             Log.e("Point error", "Thread instance is null");
         }
 
+        return false;
     }
 
 

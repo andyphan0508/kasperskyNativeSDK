@@ -10,12 +10,10 @@ import androidx.annotation.Nullable;
 
 import com.checkroot.DataStorage;
 import com.checkroot.SdkInitListener;
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.kavsdk.KavSdk;
 import com.kavsdk.antivirus.Antivirus;
@@ -25,6 +23,7 @@ import com.kavsdk.license.SdkLicenseException;
 import com.kavsdk.license.SdkLicenseViolationException;
 import com.kavsdk.rootdetector.RootDetector;
 import com.kavsdk.shared.iface.ServiceStateStorage;
+import com.kavsdk.updater.Updater;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +36,8 @@ public class RootModule extends ReactContextBaseJavaModule implements SdkInitLis
     private volatile InitStatus mSdkInitStatus = InitStatus.NotInited;
     private Antivirus mAntivirusComponent;
     private Thread scannerThread;
+
+    Updater updater = Updater.getInstance();
 
 
     RootModule(ReactApplicationContext context) {
@@ -81,20 +82,32 @@ public class RootModule extends ReactContextBaseJavaModule implements SdkInitLis
     }
     
     @ReactMethod
-    public void onSdkInitialized() {
-        Log.i("Root checking", "Root checking init");
-        scannerThread = new Thread() {
-            public void run() {
-                try {
-                    final boolean isRootedDevice = RootDetector.getInstance().checkRoot();
-                    Log.i(TAG, "Is Rooted Device: " + (isRootedDevice ? "YES" : "NO"));
-                    sendEvent(getReactApplicationContext(), "CheckRoot", isRootedDevice);
-                } catch (SdkLicenseViolationException error) {
-                    Log.e(TAG, "Check is device rooted failed due to license violation: " + error.getMessage());
-                }
-            }
-        };
-        scannerThread.start();
+    public boolean onSdkInitialized() {
+        Updater updater = Updater.getInstance();
+
+//        Log.i("Root checking", "Root checking init");
+//        scannerThread = new Thread() {
+//            public void run() {
+//                try {
+//                    final boolean isRootedDevice = RootDetector.getInstance().checkRoot();
+//                    Log.i(TAG, "Is Rooted Device: " + (isRootedDevice ? "YES" : "NO"));
+//                    sendEvent(getReactApplicationContext(), "CheckRoot", isRootedDevice);
+//                } catch (SdkLicenseViolationException error) {
+//                    Log.e(TAG, "Check is device rooted failed due to license violation: " + error.getMessage());
+//                }
+//            }
+//        };
+//        scannerThread.start();
+        try {
+            updater.updateAntivirusBases((i, i1) -> false);
+            sendEvent(getReactApplicationContext(), "CheckRoot", RootDetector.getInstance().checkRoot());
+            Log.i("Check root", "Check" + RootDetector.getInstance().checkRoot());
+            return RootDetector.getInstance().checkRoot();
+        } catch (SdkLicenseViolationException e) {
+            e.printStackTrace();
+            return false;
+        }
+
     }
 
     @Override
@@ -127,7 +140,9 @@ public class RootModule extends ReactContextBaseJavaModule implements SdkInitLis
             }
 
 
-        } catch (SdkLicenseException e) {throw new RuntimeException(e);}
+        } catch (SdkLicenseException e) {
+            throw new RuntimeException(e);
+        }
 
         SdkLicense license = KavSdk.getLicense();
         if (!license.isValid()) {
@@ -156,7 +171,7 @@ public class RootModule extends ReactContextBaseJavaModule implements SdkInitLis
 
         mSdkInitStatus = InitStatus.InitedSuccesfully;
         listener.onSdkInitialized();
-        return null;
+        return "";
     };
 
         private enum InitStatus {

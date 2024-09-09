@@ -32,6 +32,7 @@ import com.kavsdk.license.SdkLicenseNetworkException;
 import com.kavsdk.license.SdkLicenseViolationException;
 import com.kavsdk.rootdetector.RootDetector;
 import com.kavsdk.shared.iface.ServiceStateStorage;
+import com.kavsdk.updater.Updater;
 
 import java.io.File;
 import java.io.IOException;
@@ -156,12 +157,21 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
 
 
     @ReactMethod
-    public void onSdkInitialized(String mode) {
+    public void onSdkInitialized(String mode) throws SdkLicenseViolationException {
         Log.i(TAG, "EasyScanner started");
 
         mScanThread = new Thread() {
             @Override
             public void run() {
+                /** Updating database to test on Android Device */
+                Updater updater = Updater.getInstance();
+                try {
+                    updater.updateAntivirusBases((i, i1) -> false);
+                } catch (SdkLicenseViolationException e) {
+                    throw new RuntimeException(e);
+                }
+
+                /** Initialize scanning components*/
                 EasyScanner easyScanner = mAntivirusComponent.createEasyScanner();
                 easyScanner.scan(EasyMode.valueOf(mode));
                 final EasyResult result = easyScanner.getResult();

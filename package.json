@@ -16,7 +16,8 @@
     "react-native-kav-easyscanner": "file:./modules\\react-native-kav-easyscanner",
     "react-native-paper": "^5.12.5",
     "react-native-root-module": "file:./modules\\react-native-root-module",
-    "react-native-app-monitor": "file:./modules\\react-native-app-monitor"
+    "react-native-app-monitor": "file:./modules\\react-native-app-monitor",
+    "react-native-security-scan": "file:./modules\\react-native-security-scan"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

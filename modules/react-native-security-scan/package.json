@@ -1,0 +1,14 @@
+{
+  "name": "react-native-security-scan",
+  "version": "0.0.0",
+  "description": "This main module for checking the malicious software occurring",
+  "main": "src/index",
+  "author": " <> ()",
+  "license": "UNLICENSED",
+  "homepage": "#readme",
+  "create-react-native-library": {
+    "type": "module-legacy",
+    "languages": "kotlin-objc",
+    "version": "0.41.0"
+  }
+}

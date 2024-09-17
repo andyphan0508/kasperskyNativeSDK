@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import React from 'react';
-import { Divider, Text } from 'react-native-paper';
+import { Divider, Switch, Text } from 'react-native-paper';
 import { Button, RadioButton } from 'react-native-paper';
 import kasperskyEasyScanner from 'react-native-kav-easyscanner';
 import { ScanType } from 'react-native-kav-easyscanner/src/interface';
@@ -11,6 +11,14 @@ const AntivirusChecker: React.FC<any> = () => {
   const [isResult, setIsResult] = React.useState<any>();
   const [scanType, setScanType] = React.useState<ScanType>('Basic');
   const [error, setError] = React.useState<boolean>(false);
+
+  const [isEnabled, setIsEnabled] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (!isEnabled) {
+      setIsResult(undefined);
+    }
+  }, [isEnabled]);
 
   const onPress = async () => {
     try {
@@ -36,61 +44,76 @@ const AntivirusChecker: React.FC<any> = () => {
     setScanType(value as ScanType);
   };
 
-  console.log('scanType', scanType);
+  const onPressEnabled = () => {
+    setIsEnabled(!isEnabled);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={{ color: '#000000', fontWeight: '500', fontSize: 20 }}>
-        Antivirus Scanner
-      </Text>
+      <View style={{ flexDirection: 'row' }}>
+        <Text
+          style={{
+            color: '#000000',
+            fontWeight: '500',
+            fontSize: 20,
+            flex: 1,
+          }}>
+          Antivirus Scanner
+        </Text>
+        <Switch onChange={onPressEnabled} value={isEnabled} />
+      </View>
       <Text style={{ color: '#000000' }}>
         This is the antivirus scanner for your device: It will scan your device
         for any malicious software.
       </Text>
-      <Divider style={{ backgroundColor: '#0000', padding: 8 }} bold />
-      <View>
-        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Scan type</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <RadioButton
-            value="Basic"
-            onPress={() => onSelectScanType('Basic')}
-            status={scanType === 'Basic' ? 'checked' : 'unchecked'}
-          />
-          <Text>Basic</Text>
+
+      {isEnabled && (
+        <View style={{ borderWidth: 1, padding: 8, marginVertical: 8 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Scan type</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <RadioButton
+              value="Basic"
+              onPress={() => onSelectScanType('Basic')}
+              status={scanType === 'Basic' ? 'checked' : 'unchecked'}
+            />
+            <Text>Basic</Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <RadioButton
+              value="Full"
+              onPress={() => onSelectScanType('Full')}
+              status={scanType === 'Full' ? 'checked' : 'unchecked'}
+            />
+            <Text>Full</Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <RadioButton
+              value="Recommended"
+              onPress={() => onSelectScanType('Recommended')}
+              status={scanType === 'Recommended' ? 'checked' : 'unchecked'}
+            />
+            <Text>Recommended</Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <RadioButton
+              value="Light"
+              onPress={() => onSelectScanType('Light')}
+              status={scanType === 'Light' ? 'checked' : 'unchecked'}
+            />
+            <Text>Light</Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <RadioButton
+              value="LightPlus"
+              onPress={() => onSelectScanType('LightPlus')}
+              status={scanType === 'LightPlus' ? 'checked' : 'unchecked'}
+            />
+            <Text>LightPlus</Text>
+          </View>
+          <Text
+            style={{ padding: 8, fontSize: 20 }}>{`Mode: ${scanType}`}</Text>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <RadioButton
-            value="Full"
-            onPress={() => onSelectScanType('Full')}
-            status={scanType === 'Full' ? 'checked' : 'unchecked'}
-          />
-          <Text>Full</Text>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <RadioButton
-            value="Recommended"
-            onPress={() => onSelectScanType('Recommended')}
-            status={scanType === 'Recommended' ? 'checked' : 'unchecked'}
-          />
-          <Text>Recommended</Text>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <RadioButton
-            value="Light"
-            onPress={() => onSelectScanType('Light')}
-            status={scanType === 'Light' ? 'checked' : 'unchecked'}
-          />
-          <Text>Light</Text>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <RadioButton
-            value="LightPlus"
-            onPress={() => onSelectScanType('LightPlus')}
-            status={scanType === 'LightPlus' ? 'checked' : 'unchecked'}
-          />
-          <Text>LightPlus</Text>
-        </View>
-        <Text style={{ padding: 8, fontSize: 20 }}>{`Mode: ${scanType}`}</Text>
-      </View>
+      )}
       {error && (
         <View>
           <Text
@@ -109,7 +132,7 @@ const AntivirusChecker: React.FC<any> = () => {
         </View>
       ) : (
         <View>
-          <Text>{isResult}</Text>
+          <Text>{isEnabled && isResult}</Text>
         </View>
       )}
     </View>

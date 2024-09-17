@@ -12,6 +12,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.kavsdk.KavSdk;
 import com.kavsdk.antivirus.Antivirus;
@@ -31,6 +32,7 @@ import com.kavsdk.shared.iface.ServiceStateStorage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class AppMonitorModule extends ReactContextBaseJavaModule implements AvStatusListener, AppInstallationMonitorListener, AppInstallationMonitorSuspiciousListener {
 
@@ -58,21 +60,20 @@ public class AppMonitorModule extends ReactContextBaseJavaModule implements AvSt
 
     Log.i(TAG, "Sample application started");
     System.out.println("Thread" + setScanUdsAllow + setSkipRiskwareAdWare + maxAppSize);
-    /** Initialize new thread */
     new Thread(() -> {
         try {
             initializeSdk(setScanUdsAllow, setSkipRiskwareAdWare, maxAppSize, activationKey);
         } catch (SdkLicenseException e) {
             throw new RuntimeException(e);
         }
-    });
+    }).start();
   }
 
   private void initializeSdk(Boolean setScanUdsAllow, Boolean setSkipRiskwareAdWare, int maxAppSize, String activationKey) throws SdkLicenseException {
     onStatus("SDK initialization started");
     mSdkInitStatus = InitStatus.InitInProgress;
 
-    final File basesPath = getCurrentActivity().getApplicationContext().getDir("bases", Context.MODE_PRIVATE);
+    final File basesPath = Objects.requireNonNull(getCurrentActivity()).getApplicationContext().getDir("bases", Context.MODE_PRIVATE);
     ServiceStateStorage generalStorage  = new DataStorage(getCurrentActivity().getApplicationContext(), DataStorage.GENERAL_SETTINGS_STORAGE);
 
     try {
@@ -105,7 +106,6 @@ public class AppMonitorModule extends ReactContextBaseJavaModule implements AvSt
     File scanTmpDir = getCurrentActivity().getApplicationContext().getDir("scan_tmp", Context.MODE_PRIVATE);
     File monitorTmpDir = getCurrentActivity().getApplicationContext().getDir("monitor_tmp", Context.MODE_PRIVATE);
 
-
     try {
       mAntivirusComponent.initAntivirus(getCurrentActivity().getApplicationContext(),
               scanTmpDir.getAbsolutePath(), monitorTmpDir.getAbsolutePath());
@@ -135,17 +135,17 @@ public class AppMonitorModule extends ReactContextBaseJavaModule implements AvSt
     onStatus("SDK initialization failed, status=" + mSdkInitStatus + ", reason=" + mReport);
   }
 
-  private void startMonitor(Boolean setScanUdsAllow, Boolean setSkipRiskwareAdWare, int maxAppSize) {
+  private void startMonitor(Boolean setScanUdsAllow, Boolean setSkipRiskwareAdWare, int maxAppSize ) {
     onStatus("SDK initialized, AppMonitor starting");
-
+    sendEvent(getReactApplicationContext(), "Result",  "SDK initialized, AppMonitor starting");
     new Thread(() -> {
-      mAppInstallationMonitor = new AppInstallationMonitor(getCurrentActivity().getApplicationContext());
+      mAppInstallationMonitor = new AppInstallationMonitor(Objects.requireNonNull(getCurrentActivity()).getApplicationContext());
       mAppInstallationMonitor.setScanUdsAllow(setScanUdsAllow);
       mAppInstallationMonitor.setSkipRiskwareAdware(setSkipRiskwareAdWare);
       mAppInstallationMonitor.setMaxAppSize(maxAppSize);
       mAppInstallationMonitor.enable(this, this);
-      sendEvent(getReactApplicationContext(), "Result",  mAppInstallationMonitor);
       onStatus("AppMonitor started");
+      sendEvent(getReactApplicationContext(), "Result",  "AppMonitor started");
     }).start();
   }
 
@@ -213,7 +213,7 @@ public class AppMonitorModule extends ReactContextBaseJavaModule implements AvSt
   }
 
   /** This will send the event through DeviceEventEmitters*/
-  private void sendEvent(ReactContext reactContext, String eventName, @Nullable Object message) {
+  private void sendEvent(ReactContext reactContext, String eventName, @Nullable String message) {
     reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
             .emit(eventName, message);
   }

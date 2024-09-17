@@ -1,8 +1,9 @@
 package com.kaveasyscanner;
 
-import android.app.Application;
+
 import android.content.Context;
 import android.content.pm.PackageInfo;
+
 import android.content.pm.PackageManager;
 import android.util.Log;
 
@@ -18,6 +19,7 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableArray;
+
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.kavsdk.KavSdk;
 import com.kavsdk.antivirus.Antivirus;
@@ -30,7 +32,7 @@ import com.kavsdk.license.SdkLicenseDateTimeException;
 import com.kavsdk.license.SdkLicenseException;
 import com.kavsdk.license.SdkLicenseNetworkException;
 import com.kavsdk.license.SdkLicenseViolationException;
-import com.kavsdk.rootdetector.RootDetector;
+
 import com.kavsdk.shared.iface.ServiceStateStorage;
 import com.kavsdk.updater.Updater;
 
@@ -90,7 +92,7 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
     @ReactMethod
     public void initializeSdk(Context context, SdkInitListener listener) throws SdkLicenseViolationException, IOException {
 
-        Application application = new Application();
+
         final File basesPath = getCurrentActivity().getApplicationContext().getDir("bases", Context.MODE_PRIVATE);
         ServiceStateStorage generalStorage  = new DataStorage(getCurrentActivity().getApplicationContext(), DataStorage.GENERAL_SETTINGS_STORAGE);
 

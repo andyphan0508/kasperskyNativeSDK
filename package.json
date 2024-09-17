@@ -10,14 +10,24 @@
     "test": "jest"
   },
   "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/material": "^6.1.0",
+    "@react-native-async-storage/async-storage": "^2.0.0",
+    "@react-navigation/native": "^6.1.18",
+    "@react-navigation/stack": "^6.4.1",
     "create-react-native-library": "^0.41.0",
     "react": "18.2.0",
     "react-native": "0.74.5",
+    "react-native-actions-sheet": "^0.9.7",
+    "react-native-app-monitor": "file:./modules\\react-native-app-monitor",
+    "react-native-fast-image": "^8.6.3",
+    "react-native-gesture-handler": "^2.19.0",
     "react-native-kav-easyscanner": "file:./modules\\react-native-kav-easyscanner",
     "react-native-paper": "^5.12.5",
     "react-native-root-module": "file:./modules\\react-native-root-module",
-    "react-native-app-monitor": "file:./modules\\react-native-app-monitor",
-    "react-native-security-scan": "file:./modules\\react-native-security-scan"
+    "react-native-security-scan": "file:./modules\\react-native-security-scan",
+    "react-native-vector-icons": "^10.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

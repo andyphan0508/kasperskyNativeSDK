@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type {PropsWithChildren} from 'react';
+import type { PropsWithChildren } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -26,11 +26,17 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 import Home from './src/screens/Home';
 
+import { NavigationContainer } from '@react-navigation/native';
+import { AppRegistry } from 'react-native';
+import AntivirusChecker from './src/components/AntivirusScanner';
+import AppMonitor from './src/components/AppMonitor';
+import CheckRoot from './src/components/RootScanner';
+
 type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
+function Section({ children, title }: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
@@ -62,38 +68,11 @@ function App(): React.JSX.Element {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
-  return <Home />;
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    // <NavigationContainer>
+    <Home />
+
+    // </NavigationContainer>
   );
 }
 
@@ -115,5 +94,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+
+import { name as appName } from './app.json';
+
+AppRegistry.registerComponent(appName, () => App);
 
 export default App;

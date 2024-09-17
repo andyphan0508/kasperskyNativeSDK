@@ -24,9 +24,6 @@ const kasperskyAppMonitor = ({
 }: MonitorType): Promise<any> => {
   const { AppMonitorSDK } = NativeModules;
 
-  /** Set the PRODUCT KEY for first Initalize the API */
-  const DEFAULT_KEY = 'JKBSB-WMEQD-KY8MG-1CGGW';
-
   return new Promise((resolve, reject) => {
     let result: EmitterSubscription;
     result = DeviceEventEmitter.addListener('AllResult', data => {
@@ -47,5 +44,6 @@ const kasperskyAppMonitor = ({
     }
   });
 };
-
+/** Set the PRODUCT KEY for first Initalize the API */
+const DEFAULT_KEY = 'JKBSB-WMEQD-KY8MG-1CGGW';
 export default kasperskyAppMonitor;

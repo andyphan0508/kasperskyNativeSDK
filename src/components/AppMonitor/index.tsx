@@ -1,13 +1,19 @@
 // import { Button } from '@mui/material';
 import React from 'react';
-import { DeviceEventEmitter } from 'react-native';
+import {DeviceEventEmitter, Image, TouchableOpacity} from 'react-native';
 
-import { StyleSheet, Text, View } from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 
 import kasperskyAppMonitor from 'react-native-app-monitor';
-import { Switch, Button } from 'react-native-paper';
+import {Switch, Button, Divider} from 'react-native-paper';
+
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {images} from '../../assets';
+import {useAppNavigation} from '../../navigation/AppNavigation';
 
 const AppMonitor: React.FC<any> = () => {
+  const navigation = useAppNavigation();
+
   const [state, setState] = React.useState<any>({
     setScanUdsAllow: false,
     setSkipRiskwareAdWare: false,
@@ -18,29 +24,15 @@ const AppMonitor: React.FC<any> = () => {
   });
 
   const [isEnabled, setIsEnabled] = React.useState<boolean>();
-  const [skipRiskwareAdWare, setSkipRiskwareAdWare] = React.useState<boolean>();
-  const [scanUds, setScanUds] = React.useState<boolean>();
+  const [skipRiskwareAdWare, setSkipRiskwareAdWare] =
+    React.useState<boolean>(false);
+  const [scanUds, setScanUds] = React.useState<boolean>(true);
 
   React.useEffect(() => {
     DeviceEventEmitter.addListener('Result', event => {
-      setState({ ...state, result: event });
+      setState({...state, result: event});
     });
   }, []);
-
-  React.useEffect(() => {
-    if (!isEnabled) {
-      setState({
-        setScanUdsAllow: false,
-        setSkipRiskwareAdWare: false,
-        maxAppSize: 102,
-        udsScan: false,
-        skipRiskwareAdWare: false,
-        result: '',
-      });
-      setScanUds(false);
-      setSkipRiskwareAdWare(false);
-    }
-  }, [isEnabled]);
 
   const onFunction = async () => {
     try {
@@ -54,10 +46,6 @@ const AppMonitor: React.FC<any> = () => {
     }
   };
 
-  const onPressEnabled = () => {
-    setIsEnabled(!isEnabled);
-  };
-
   const onEnableSkipRiskwareAdware = () => {
     setSkipRiskwareAdWare(!skipRiskwareAdWare);
   };
@@ -67,40 +55,93 @@ const AppMonitor: React.FC<any> = () => {
   };
 
   return (
-    <View style={{ padding: 8 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Text style={{ flex: 1, fontSize: 20, color: '#000000' }}>
-          App Monitor
-        </Text>
-        <Switch onChange={onPressEnabled} value={isEnabled} />
-      </View>
-      {isEnabled && (
-        <View style={{ borderWidth: 1, padding: 8, marginVertical: 8 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ flex: 1 }}>Allow scan UDS</Text>
-            <Switch onChange={onEnableScanUds} value={scanUds} />
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ flex: 1 }}>Skip Riskware/Adware</Text>
-            <Switch
-              onChange={onEnableSkipRiskwareAdware}
-              value={skipRiskwareAdWare}
-            />
-          </View>
-          <View style={{}}>
-            <Button
-              onPress={onFunction}
-              style={{ backgroundColor: 'lightgray' }}>
-              Press here to monitor
-            </Button>
-            <View>
-              <Text>{state.setScanUdsAllow ? 'true' : 'false'}</Text>
-              <Text>{skipRiskwareAdWare ? 'true' : 'false'}</Text>
-              <Text>{state.result}</Text>
-            </View>
-          </View>
+    <View style={{padding: 8}}>
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <Ionicons name="arrow-back-circle" size={40} color="#29CCB1" />
+      </TouchableOpacity>
+      <Image
+        source={images.heart_rate}
+        resizeMode="contain"
+        style={{height: 200, width: '100%'}}
+      />
+
+      <Text
+        style={{
+          color: '#1D1D1B',
+          fontWeight: '700',
+          fontSize: 30,
+        }}>
+        Kiểm soát thiết bị
+      </Text>
+      <Text
+        style={{
+          color: '#1D1D1B',
+          lineHeight: 20,
+          fontSize: 15,
+          marginVertical: 8,
+        }}>
+        Để đảm bảo an toàn giữa các ứng dụng, bạn có thể sử dụng chức năng này
+        để kiểm soát ứng dụng trên thiết bị của mình. Cho phép Kaspersky quét
+        ứng dụng không an toàn, và theo dõi các ứng dụng có trong thiết bị của
+        mình.
+      </Text>
+      <Divider style={{borderWidth: 0.25, marginVertical: 8}} />
+      <Text
+        style={{
+          fontSize: 25,
+          fontWeight: '800',
+          marginBottom: 8,
+          color: '#1D1D1B',
+        }}>
+        Tùy chỉnh
+      </Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+        <View style={{flex: 1}}>
+          <Text style={{fontSize: 15, fontWeight: 'bold', color: '#1D1D1B'}}>
+            Bỏ qua ứng dụng mã độc
+          </Text>
+          <Text style={{fontSize: 12, color: '#1D1D1B'}}>
+            {
+              'Cho phép bỏ qua tất cả những ứng dụng có mã độc trong máy của bạn'
+            }
+          </Text>
         </View>
-      )}
+        <Switch
+          value={skipRiskwareAdWare}
+          onChange={onEnableSkipRiskwareAdware}
+          color="#00A88E"
+        />
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+        <View style={{flex: 1}}>
+          <Text style={{fontSize: 15, fontWeight: 'bold', color: '#1D1D1B'}}>
+            Quét UDS
+          </Text>
+          <Text style={{fontSize: 12, color: '#1D1D1B'}}>
+            {
+              'Cho phép bỏ qua tất cả những ứng dụng có mã độc trong máy của bạn'
+            }
+          </Text>
+        </View>
+        <Switch value={scanUds} onChange={onEnableScanUds} color="#00A88E" />
+      </View>
+      <Button
+        onPress={onFunction}
+        style={{
+          backgroundColor: '#29CCB1',
+          borderRadius: 8,
+          marginVertical: 8,
+        }}>
+        Nhấn để theo dõi
+      </Button>
     </View>
   );
 };

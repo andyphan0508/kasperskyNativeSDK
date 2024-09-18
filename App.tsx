@@ -1,42 +1,26 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
+import {name as appName} from './app.json';
 import React from 'react';
-import type { PropsWithChildren } from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import type {PropsWithChildren} from 'react';
+import {StyleSheet, Text, useColorScheme, View} from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {AppRegistry} from 'react-native';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+
 import Home from './src/screens/Home';
-
-import { NavigationContainer } from '@react-navigation/native';
-import { AppRegistry } from 'react-native';
 import AntivirusChecker from './src/components/AntivirusScanner';
 import AppMonitor from './src/components/AppMonitor';
 import CheckRoot from './src/components/RootScanner';
+import About from './src/screens/About';
 
 type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-function Section({ children, title }: SectionProps): React.JSX.Element {
+function Section({children, title}: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
@@ -63,39 +47,31 @@ function Section({ children, title }: SectionProps): React.JSX.Element {
 }
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const Stack = createNativeStackNavigator();
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
   return (
-    // <NavigationContainer>
-    <Home />
-
-    // </NavigationContainer>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{headerShown: false}}
+          initialRouteName="Home">
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="About" component={About} />
+          <Stack.Screen name="Antivirus" component={AntivirusChecker} />
+          <Stack.Screen name="AppMonitor" component={AppMonitor} />
+          <Stack.Screen name="Root" component={CheckRoot} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
+  sectionContainer: {marginTop: 32, paddingHorizontal: 24},
+  sectionTitle: {fontSize: 24, fontWeight: '600'},
+  sectionDescription: {marginTop: 8, fontSize: 18, fontWeight: '400'},
+  highlight: {fontWeight: '700'},
 });
-
-import { name as appName } from './app.json';
 
 AppRegistry.registerComponent(appName, () => App);
 

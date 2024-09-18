@@ -10,25 +10,6 @@ function CustomView(props: SheetProps) {
   const { height } = useWindowDimensions();
   const actionSheetRef = React.useRef<ActionSheetRef>(null);
 
-  if (props.payload?.render) {
-    const Com = props.payload?.render;
-    return (
-      <ActionSheet
-        id={props.sheetId}
-        ref={actionSheetRef}
-        gestureEnabled={false}
-        keyboardHandlerEnabled={true}
-        useBottomSafeAreaPadding={true}
-        headerAlwaysVisible={true}
-        defaultOverlayOpacity={0.1}
-        containerStyle={{
-          paddingBottom: 0,
-          maxHeight: height * 0.8,
-        }}>
-        <Com onClose={() => actionSheetRef.current?.hide?.()} />
-      </ActionSheet>
-    );
-  }
   return (
     <ActionSheet
       id={props.sheetId}

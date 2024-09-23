@@ -20,8 +20,8 @@ const WebFilter: React.FC = () => {
 
       <Text style={styles.title}>Lọc website</Text>
       <Text style={styles.description}>
-        Để đảm bảo an toàn giữa các ứng dụng, bạn có thể sử dụng chức năng này để kiểm soát ứng dụng trên thiết bị của
-        mình. Cho phép Kaspersky quét ứng dụng không an toàn, và theo dõi các ứng dụng có trong thiết bị của mình.
+        Nguồn thông tin trên mạng rất đa dạng, không phải thông tin nào cũng đáng tin cậy. Để có thể đảm bảo được thông
+        tin chính xác, bạn cần lọc thông tin từ các trang web đáng tin cậy.
       </Text>
       <Divider style={{borderWidth: 0.25, marginVertical: 8}} />
     </View>

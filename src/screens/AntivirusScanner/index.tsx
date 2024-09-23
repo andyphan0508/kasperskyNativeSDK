@@ -10,6 +10,7 @@ import {images} from '../../assets';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {StackScreenProps} from '@react-navigation/stack';
+import colors from '../../themes/colors/colors';
 
 const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
   const styles = createStyles();
@@ -59,12 +60,7 @@ const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
         <Ionicons name="arrow-back-circle" size={40} color="#00A88E" />
       </TouchableOpacity>
       <Image source={images.virus_scan} resizeMode="contain" style={{height: 200, width: '100%'}} />
-      <View style={{flexDirection: 'row'}}>
-        <Text style={styles.title}>Diệt virus</Text>
-        <Button style={styles.sync} onPress={onSync}>
-          <Text style={{color: '#FFFF', fontWeight: 'bold'}}>Đồng bộ hóa</Text>
-        </Button>
-      </View>
+      <Text style={styles.title}>Diệt virus</Text>
       {!isLoading && !isResult ? (
         <Text style={{color: '#1D1D1B', lineHeight: 23}}>
           Trình diệt virus này sẽ quét qua thiết bị của bạn, đồng thời sẽ kiểm tra xem có mã độc, đảm bảo thiết bị của
@@ -78,7 +74,16 @@ const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
       ) : (
         <Text>{!!isResult && !isLoading && typeof isResult === 'string' && isResult.split(',').join('\n')}</Text>
       )}
-
+      <View style={{flexDirection: 'row', gap: 8}}>
+        <TouchableOpacity style={styles.updateSelection}>
+          <Text style={{fontWeight: '700', fontSize: 18}}>Cập nhật database</Text>
+          <Text style={{color: colors.dark.primary}}>Cập nhật ngay</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.updateSelection}>
+          <Text style={{fontWeight: '700', fontSize: 18}}>Quyền truy cập</Text>
+          <Text style={{color: colors.dark.primary}}>Cho phép quyền truy cập vào hệ thống</Text>
+        </TouchableOpacity>
+      </View>
       <View style={{marginVertical: 8}}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Text style={{fontSize: 20, fontWeight: 'bold', flex: 1}}>Các loại quét</Text>
@@ -165,5 +170,6 @@ const createStyles = () => {
     optionBox: {marginHorizontal: 16, flex: 1},
     selection: {flexDirection: 'row', alignItems: 'center', borderRadius: 8, paddingLeft: 8},
     sync: {backgroundColor: '#29CCB1', color: '#FFFFFF', position: 'absolute', right: 0, borderRadius: 8},
+    updateSelection: {backgroundColor: '#FFFFFF', flex: 1, padding: 8, borderRadius: 8},
   });
 };

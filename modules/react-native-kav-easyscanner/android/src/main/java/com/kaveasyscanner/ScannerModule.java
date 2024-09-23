@@ -1,14 +1,29 @@
 package com.kaveasyscanner;
 
+import static android.os.Build.VERSION.SDK_INT;
 
+
+import static androidx.core.app.ActivityCompat.startActivityForResult;
+
+import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 
 import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 
 import com.easyscanner.SdkInitListener;
 import com.easyscanner.AvCompletedListener;
@@ -40,6 +55,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 
 public class ScannerModule extends ReactContextBaseJavaModule implements SdkInitListener {
@@ -51,6 +69,9 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
     private Antivirus mAntivirusComponent;
     private Thread mScanThread;
     private AvCompletedListener mAvCompletedListener;
+    
+    private static final int ALL_FILES_PERMISSION_REQ_CODE = 4;
+    private static final int BACKGROUND_LOCATION_REQ_CODE = 5;
 
     ScannerModule(ReactApplicationContext context) {
         super(context);
@@ -157,6 +178,48 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
 
     }
 
+    @ReactMethod
+    public void getPermissionClick() {
+         final String[] PERMISSIONS_STORAGE = {
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        };
+        boolean hasAccessToAllFiles = false;
+        boolean hasLocationPermission = false;
+        hasAccessToAllFiles = getFileAccessStatus();
+        if (!hasAccessToAllFiles && SDK_INT == 29) {
+            Log.i(TAG, "Requesting RW to Storage. API 29");
+            ActivityCompat.requestPermissions(
+                    Objects.requireNonNull(getCurrentActivity()),
+                    PERMISSIONS_STORAGE,
+                    ALL_FILES_PERMISSION_REQ_CODE
+
+            );
+        }
+
+        if (!hasAccessToAllFiles && SDK_INT >= Build.VERSION_CODES.R) {
+            Log.i(TAG, "Requesting Manage All Storage. API 30+");
+            requestAllFilesAccessPermission();
+        }
+
+        if (hasAccessToAllFiles) {
+
+        }
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.R)
+    public void requestAllFilesAccessPermission() {
+        try {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+            startActivityForResult(intent, ALL_FILES_PERMISSION_REQ_CODE);
+        } catch (ActivityNotFoundException error) {
+
+        }
+    }
+
+    private void startActivityForResult(Intent intent, int allFilesPermissionReqCode) {
+    }
 
     @ReactMethod
     public void onSdkInitialized(String mode) throws SdkLicenseViolationException {
@@ -172,6 +235,10 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
                 } catch (SdkLicenseViolationException e) {
                     throw new RuntimeException(e);
                 }
+
+                /** Check permission */
+                ActivityCompat.checkSelfPermission(getCurrentActivity().getApplicationContext(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION);
 
                 /** Initialize scanning components*/
                 EasyScanner easyScanner = mAntivirusComponent.createEasyScanner();
@@ -274,9 +341,27 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
 
     // Method to send log messages to JS via event emitter
     private void sendEvent(ReactContext reactContext, String eventName, @Nullable String message) {
+        List<String> messageList = Arrays.asList(message);
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit(eventName, message);
     }
+
+    private boolean getFileAccessStatus() {
+        boolean hasAccess = true;
+        if (SDK_INT >= 30) {
+            hasAccess = Environment.isExternalStorageManager();
+        }
+
+        if (SDK_INT == 29) {
+            int permission = ActivityCompat.checkSelfPermission(getCurrentActivity().getApplicationContext(),
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            hasAccess = (permission == PackageManager.PERMISSION_GRANTED);
+        }
+
+        return hasAccess;
+    }
+
+
 
 
 }

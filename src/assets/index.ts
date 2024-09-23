@@ -8,6 +8,8 @@ export const images = {
   device_unknown: require('./question.png'),
   device_secure: require('./smartphone.png'),
   device_unsecure: require('./no-smartphones.png'),
+  shield: require('./shield.png'),
+  browser: require('./browser.png'),
 };
 
 export const icons = {

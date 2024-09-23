@@ -1,14 +1,19 @@
-import {
-  DeviceEventEmitter,
-  EmitterSubscription,
-  NativeModules,
-  Platform,
-} from 'react-native';
+import {DeviceEventEmitter, EmitterSubscription, NativeModules, Platform} from 'react-native';
 
-import { ExportResult, ScanType } from './interface';
+import {ExportResult, ScanType} from './interface';
 
-const kasperskyEasyScanner = (scanType: ScanType): Promise<any> => {
-  const { KasperskyScannerSDK } = NativeModules;
+export const getPermission = async (): Promise<boolean> => {
+  const {KasperskyScannerSDK} = NativeModules;
+
+  if (Platform.OS === 'android') {
+    return KasperskyScannerSDK.getPermissionClick();
+  }
+
+  return true;
+};
+
+export const kasperskyEasyScanner = (scanType: ScanType): Promise<any> => {
+  const {KasperskyScannerSDK} = NativeModules;
 
   return new Promise((resolve, reject) => {
     let result: EmitterSubscription;
@@ -25,4 +30,4 @@ const kasperskyEasyScanner = (scanType: ScanType): Promise<any> => {
   });
 };
 
-export default kasperskyEasyScanner;
+export default {kasperskyEasyScanner, getPermission};

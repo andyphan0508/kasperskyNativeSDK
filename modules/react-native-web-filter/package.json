@@ -1,0 +1,14 @@
+{
+  "name": "react-native-web-filter",
+  "version": "0.0.0",
+  "description": "This React modules use for monitize the web, checking for suspicious activity on the web to block when needed",
+  "main": "src/index",
+  "author": " <> ()",
+  "license": "UNLICENSED",
+  "homepage": "#readme",
+  "create-react-native-library": {
+    "type": "module-legacy",
+    "languages": "kotlin-objc",
+    "version": "0.41.2"
+  }
+}

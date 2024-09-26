@@ -1,22 +1,39 @@
-import { NativeModules, Platform } from 'react-native';
+import {DeviceEventEmitter, EmitterSubscription, NativeModules, Platform} from 'react-native';
 
-const LINKING_ERROR =
-  `The package 'react-native-web-filter' doesn't seem to be linked. Make sure: \n\n` +
-  Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
-  '- You rebuilt the app after installing the package\n' +
-  '- You are not using Expo Go\n';
+const {KasperskyWebFilter} = NativeModules;
 
-const WebFilter = NativeModules.WebFilter
-  ? NativeModules.WebFilter
-  : new Proxy(
-      {},
-      {
-        get() {
-          throw new Error(LINKING_ERROR);
-        },
-      }
-    );
+/** Setting to update the database */
+export const updateDatabase = (): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    let result: EmitterSubscription;
+    result = DeviceEventEmitter.addListener('Status', data => {
+      resolve(data);
+      result.remove();
+    });
 
-export function multiply(a: number, b: number): Promise<number> {
-  return WebFilter.multiply(a, b);
-}
+    try {
+      KasperskyWebFilter.updateDatabase();
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+export const kasperkeyWebFilter = (): Promise<any> => {
+  // Check whether the device activate the webFilter
+  return new Promise((resolve, reject) => {
+    let result: EmitterSubscription;
+    result = DeviceEventEmitter.addListener('CheckRoot', data => {
+      resolve(data);
+      result.remove();
+    });
+
+    try {
+      KasperskyWebFilter.onCreate();
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+export default {kasperkeyWebFilter, updateDatabase};

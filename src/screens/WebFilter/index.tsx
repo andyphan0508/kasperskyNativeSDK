@@ -3,13 +3,33 @@ import React from 'react';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {images} from '../../assets';
-import {Divider} from 'react-native-paper';
+import {Button, Divider} from 'react-native-paper';
 
 import {useAppNavigation} from '../../navigation/AppNavigation';
+
+import {kasperkeyWebFilter, updateDatabase} from 'react-native-web-filter';
 
 const WebFilter: React.FC = () => {
   const styles = createStyles();
   const navigation = useAppNavigation();
+
+  /** This function will update the database of the Anti */
+  const onUpdateDatabase = async () => {
+    try {
+      const resp = await updateDatabase();
+      console.log(resp);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onPress = async () => {
+    try {
+      await kasperkeyWebFilter();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -24,6 +44,8 @@ const WebFilter: React.FC = () => {
         tin chính xác, bạn cần lọc thông tin từ các trang web đáng tin cậy.
       </Text>
       <Divider style={{borderWidth: 0.25, marginVertical: 8}} />
+
+      <Button onPress={onUpdateDatabase}>Kiểm tra</Button>
     </View>
   );
 };

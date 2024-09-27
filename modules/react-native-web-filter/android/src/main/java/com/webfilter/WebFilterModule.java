@@ -9,7 +9,6 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.kaspersky.components.urlchecker.UrlCategory;
 import com.kavsdk.KavSdk;
@@ -42,7 +41,6 @@ class WebFilterModule extends ReactContextBaseJavaModule implements SdkInitListe
     private Thread mThread;
     private Context mContext;
     private static final int WEB_FILTER_FLAGS = 0x0;
-
     private static final String LOCAL_HOST    = "127.0.0.1"; //NOPMD
     WebFilterControl mWebFilter;
     private AvCompletedListener mOpCompletedListener;
@@ -57,7 +55,7 @@ class WebFilterModule extends ReactContextBaseJavaModule implements SdkInitListe
 
     /** Setting the update */
     @ReactMethod
-    public void updateDatabase () throws SdkLicenseViolationException{
+    public void updateDatabase () {
         final Context context = getReactApplicationContext().getApplicationContext();
         initializeSdk(context, WebFilterModule.this);
         Updater updater = Updater.getInstance(); //
@@ -72,6 +70,7 @@ class WebFilterModule extends ReactContextBaseJavaModule implements SdkInitListe
 
     }
 
+    /** Update and initialize the SDK */
     @ReactMethod
     public void onCreate() {
         Log.i(TAG, "Sample application started");
@@ -82,6 +81,7 @@ class WebFilterModule extends ReactContextBaseJavaModule implements SdkInitListe
             }}).start();
     }
 
+    /** Check for product keys, listener, */
     private void initializeSdk(Context context, SdkInitListener listener)
     {
         final File basesPath = getCurrentActivity().getDir("bases", Context.MODE_PRIVATE);
@@ -113,16 +113,12 @@ class WebFilterModule extends ReactContextBaseJavaModule implements SdkInitListe
             listener.onInitializationFailed("New license code is required");
             return;
         }
-
         mAntivirusComponent = AntivirusInstance.getInstance();
-
         File scanTmpDir = getCurrentActivity().getDir("scan_tmp", Context.MODE_PRIVATE);
         File monitorTmpDir = getCurrentActivity().getDir("monitor_tmp", Context.MODE_PRIVATE);
 
         try {
-            mAntivirusComponent.initAntivirus(getCurrentActivity().getApplicationContext(),
-                    scanTmpDir.getAbsolutePath(), monitorTmpDir.getAbsolutePath());
-
+            mAntivirusComponent.initAntivirus(getCurrentActivity().getApplicationContext(), scanTmpDir.getAbsolutePath(), monitorTmpDir.getAbsolutePath());
         } catch (SdkLicenseViolationException e) {
             mSdkInitStatus = InitStatus.InitFailed;
             listener.onInitializationFailed(e.getMessage());
@@ -158,15 +154,7 @@ class WebFilterModule extends ReactContextBaseJavaModule implements SdkInitListe
         WebFilterControl webFilterControl = null;
         try {
             webFilterControl = new WebFilterControlFactoryImpl().
-                    create(
-                            new MyUrlFilterHandler(),
-                            mContext,
-                            flags,
-                            LOCAL_HOST,
-                            webFilterPort,
-                            LOCAL_HOST,
-                            webFilterPort
-                    );
+                    create(new MyUrlFilterHandler(), mContext, flags, LOCAL_HOST, webFilterPort, LOCAL_HOST, webFilterPort);
 
             // Deny next categories to access
             webFilterControl.setCategoryEnabled(UrlCategory.PornoAndErotic);
@@ -186,9 +174,7 @@ class WebFilterModule extends ReactContextBaseJavaModule implements SdkInitListe
         mThread = new Thread() {
             @Override
             public void run() {
-
                 Log.i(TAG, "WebFilter init complete");
-
                 if (mOpCompletedListener != null) {
                     mOpCompletedListener.onAvCompleted("Now open Google Chrome:\n\nSocial networks must be blocked,\nporn sites must be blocked,\nany malware URLs must be blocked\nany other sites are not affected");
                 }

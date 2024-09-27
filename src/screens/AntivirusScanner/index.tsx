@@ -10,7 +10,7 @@ import {
   Platform,
   PermissionsAndroid,
 } from 'react-native';
-import React from 'react';
+import React, {useCallback} from 'react';
 import {Divider, Text} from 'react-native-paper';
 import {Button} from 'react-native-paper';
 import {
@@ -23,12 +23,15 @@ import {images} from '../../assets';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import {StackScreenProps} from '@react-navigation/stack';
 import colors from '../../themes/colors/colors';
 
 import RNFS from 'react-native-fs';
 
 const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
+  const bottomSheetRef = React.useRef<BottomSheet>(null);
+
   const styles = createStyles();
   const [isLoading, setIsLoading] = React.useState(false);
   const [isResult, setIsResult] = React.useState<any>([]);
@@ -41,6 +44,10 @@ const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
   React.useEffect(() => {
     setIsResult(undefined);
   }, [scanType]);
+
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log('handleSheetChanges', index);
+  }, []);
 
   /** Requesting the information */
   const requestStoragePermission = async () => {
@@ -120,45 +127,64 @@ const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
       const result = await kasperskyEasyScanner(scanType);
 
       setIsResult(result);
+      renderResult(result);
       setIsLoading(false);
+
+      console.log(result);
     } catch (error) {
       setError(true);
     }
+  };
+  const renderResult = (result: any) => {
+    Alert.alert('Kết quả', result);
   };
 
   const onSelectScanType = (value: string) => setScanType(value as ScanType);
 
   return (
     <ScrollView style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back-circle" size={40} color="#00A88E" />
-      </TouchableOpacity>
+      <View style={styles.navigation}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back-circle" size={40} color="#00A88E" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('AboutAntivirus')}>
+          <AntDesign name="questioncircle" size={25} />
+        </TouchableOpacity>
+      </View>
+
       <Image
         source={images.virus_scan}
         resizeMode="contain"
-        style={{height: 200, width: '100%'}}
+        style={{height: 120, width: '100%'}}
       />
       <Text style={styles.title}>Diệt virus</Text>
-      {!isLoading && !isResult ? (
-        <Text style={{color: '#1D1D1B', lineHeight: 23}}>
-          Trình diệt virus này sẽ quét qua thiết bị của bạn, đồng thời sẽ kiểm
-          tra xem có mã độc, đảm bảo thiết bị của bạn luôn được an toàn và bảo
-          vệ toàn diện khỏi các mã độc hại.
+      <Button onPress={onPress} style={{backgroundColor: '#29CCB1'}}>
+        <Text style={{color: '#FFFFFF', fontSize: 15, fontWeight: 'bold'}}>
+          Quét
         </Text>
-      ) : isLoading ? (
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+      </Button>
+      {!isLoading && !isResult ? (
+        <Text
+          style={{
+            textAlign: 'center',
+            marginHorizontal: 32,
+            marginVertical: 8,
+          }}>
+          Hãy chọn một trong những cách quét thiết bị dưới đây và bắt đầu
+        </Text>
+      ) : (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginVertical: 8,
+          }}>
           <ActivityIndicator size="large" color="#00A88E" />
           <Text style={{color: '#1D1D1B', lineHeight: 23, marginHorizontal: 8}}>
             Đang quét...
           </Text>
         </View>
-      ) : (
-        <Text>
-          {!!isResult &&
-            !isLoading &&
-            typeof isResult === 'string' &&
-            isResult.split(',').join('\n')}
-        </Text>
       )}
       <View style={{flexDirection: 'row', gap: 8, marginVertical: 8}}>
         <TouchableOpacity
@@ -282,15 +308,15 @@ const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
             </Text>
           </View>
         </TouchableOpacity>
+        {/* <BottomSheet
+          ref={bottomSheetRef}
+          onChange={handleSheetChanges}
+          snapPoints={['30%', '50%']}>
+          <BottomSheetView style={styles.contentContainer}>
+            <Text>Awesome 🎉</Text>
+          </BottomSheetView>
+        </BottomSheet> */}
       </View>
-
-      <Button
-        onPress={onPress}
-        style={{backgroundColor: '#29CCB1', paddingBottom: 8}}>
-        <Text style={{color: '#FFFFFF', fontSize: 15, fontWeight: 'bold'}}>
-          Quét
-        </Text>
-      </Button>
     </ScrollView>
   );
 };
@@ -299,8 +325,21 @@ export default AntivirusChecker;
 
 const createStyles = () => {
   return StyleSheet.create({
+    navigation: {
+      flexDirection: 'row',
+      flex: 1,
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
     container: {marginTop: 24, padding: 16, paddingBottom: 16},
-    title: {color: '#1D1D1B', fontWeight: '700', fontSize: 30, flex: 1},
+    title: {
+      marginVertical: 16,
+      color: '#1D1D1B',
+      fontWeight: '700',
+      fontSize: 30,
+      flex: 1,
+      textAlign: 'center',
+    },
     optionTitle: {flex: 1, fontSize: 18, fontWeight: 'bold'},
     optionSubtitle: {flex: 0.8, fontSize: 11, lineHeight: 20},
     optionBox: {marginHorizontal: 16, flex: 1},
@@ -322,6 +361,10 @@ const createStyles = () => {
       flex: 1,
       padding: 8,
       borderRadius: 8,
+    },
+    contentContainer: {
+      flex: 1,
+      alignItems: 'center',
     },
   });
 };

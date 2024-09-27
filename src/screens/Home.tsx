@@ -1,4 +1,13 @@
-import {View, Text, Image, TouchableOpacity, StyleSheet, FlatList, Alert} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Alert,
+  ScrollView,
+} from 'react-native';
 import React from 'react';
 import {images} from '../assets';
 
@@ -30,12 +39,6 @@ const Home: React.FC<StackScreenProps<any>> = ({navigation}) => {
 
   const DATA: DataInterface[] = [
     {
-      title: 'Thông tin',
-      description: 'Thông tin về ứng dụng',
-      type: Type.information,
-      onPress: () => navigation.navigate('About'),
-    },
-    {
       title: 'Theo dõi',
       description: 'Theo dõi trạng thái thiết bị',
       type: Type.monitor,
@@ -59,53 +62,92 @@ const Home: React.FC<StackScreenProps<any>> = ({navigation}) => {
       type: Type.filter,
       onPress: () => navigation.navigate('Filter'),
     },
+    {
+      title: 'Thông tin',
+      description: 'Thông tin về ứng dụng',
+      type: Type.information,
+      onPress: () => navigation.navigate('About'),
+    },
   ];
 
   const renderIcon = (name: Type) => {
     switch (name) {
       case Type.information:
-        return <MaterialIcons name="info" size={30} color="black" />;
+        return <MaterialIcons name="info" size={30} color="white" />;
       case Type.monitor:
-        return <MaterialIcons name="monitor-heart" color="black" size={30} />;
+        return <MaterialIcons name="monitor-heart" size={30} color="white" />;
       case Type.antivirus:
-        return <MaterialIcons name="bug-report" color="black" size={30} />;
+        return <MaterialIcons name="bug-report" size={30} color="white" />;
       case Type.root:
-        return <MaterialIcons name="security" color="black" size={30} />;
+        return <MaterialIcons name="security" size={30} color="white" />;
       case Type.filter:
-        return <MaterialIcons name="webhook" color="black" size={30} />;
+        return <MaterialIcons name="back-hand" size={30} color="white" />;
     }
   };
 
-  const renderItem = (title?: string, description?: string, type?: Type, onPress?: () => void) => {
+  const renderItem = (
+    title?: string,
+    description?: string,
+    type?: Type,
+    onPress?: () => void,
+  ) => {
     return (
       <TouchableOpacity onPress={onPress} style={styles.selection}>
-        {renderIcon(type as Type)}
-        <Text style={styles.title}>{title}</Text>
-        <Text style={{fontSize: 12, color: 'black'}}>{description}</Text>
+        <View
+          style={{
+            backgroundColor: colors.dark.primary,
+            padding: 8,
+            borderRadius: 32,
+          }}>
+          {renderIcon(type as Type)}
+        </View>
+        <View style={styles.info}>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={{fontSize: 12, color: 'black'}}>{description}</Text>
+        </View>
+        <MaterialIcons name="chevron-right" size={20} />
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={{backgroundColor: 'white', flex: 1, flexWrap: 'wrap'}}>
+    <ScrollView
+      style={{backgroundColor: 'white'}}
+      showsVerticalScrollIndicator={false}>
       <Image source={images.header} style={styles.title1} />
       <View>
-        <Image source={images.shield} style={{alignSelf: 'center', height: 130, width: 130, marginTop: 16}} />
+        <Image
+          source={images.shield}
+          style={{alignSelf: 'center', height: 110, width: 110, marginTop: 16}}
+        />
         <Text style={styles.textDevice}>Hãy bắt đầu</Text>
         <Text style={styles.headerTitle}>BẢO MẬT THIẾT BỊ CỦA BẠN</Text>
       </View>
-      <LinearGradient colors={[colors.dark.primary, colors.dark.primary1]} style={styles.wrapMenu}>
+      <View style={styles.wrapMenu}>
         <Text style={styles.quickAction}>Hành động</Text>
-        <View style={{alignItems: 'center', justifyContent: 'center'}}>
-          <FlatList
-            data={DATA}
-            renderItem={({item}) => renderItem(item.title, item.description, item.type, item.onPress)}
-            numColumns={2}
-          />
+        <View
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            flex: 1,
+          }}>
+          {!!DATA && (
+            <View style={{flex: 1, width: '100%', paddingHorizontal: 8}}>
+              {DATA.map(item =>
+                renderItem(
+                  item.title,
+                  item.description,
+                  item.type,
+                  item.onPress,
+                ),
+              )}
+            </View>
+          )}
         </View>
-      </LinearGradient>
+      </View>
       <Text style={styles.footer}>Kaspersky | VTC Telecom, 2024</Text>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -125,8 +167,18 @@ const createStyles = () => {
       borderRadius: 8,
       alignItems: 'center',
     },
-    title1: {width: '80%', height: 80, alignItems: 'center', alignSelf: 'center'},
-    wrapMenu: {backgroundColor: '#29CCB1', width: '100%', flex: 1, paddingTop: 8},
+    title1: {
+      color: '#1D1D1B',
+      width: '80%',
+      height: 80,
+      alignItems: 'center',
+      alignSelf: 'center',
+    },
+    wrapMenu: {
+      width: '100%',
+      flex: 1,
+      paddingTop: 8,
+    },
     textDevice: {
       fontSize: 20,
       alignSelf: 'center',
@@ -138,16 +190,23 @@ const createStyles = () => {
       backgroundColor: 'white',
       marginTop: 8,
       marginHorizontal: 4,
-      padding: 8,
-      width: 180,
-      justifyContent: 'center',
+      padding: 16,
       shadowColor: '#000000',
-      shadowOffset: {width: 2, height: 2},
-      shadowOpacity: 0.25,
+      elevation: 4,
+      flexDirection: 'row',
+      alignItems: 'center',
+      shadowOffset: {width: 100, height: 100},
+      shadowOpacity: 1,
       borderRadius: 8,
     },
-    title: {fontSize: 15, marginTop: 4, fontWeight: '500', color: 'black'},
-    quickAction: {paddingHorizontal: 16, paddingTop: 8, fontSize: 18, color: colors.dark.secondary4, fontWeight: '700'},
+    title: {fontSize: 18, marginTop: 4, fontWeight: '800', color: 'black'},
+    quickAction: {
+      paddingHorizontal: 16,
+      paddingTop: 8,
+      fontSize: 18,
+      color: '#1D1D1B',
+      fontWeight: '700',
+    },
     headerTitle: {
       fontSize: 28,
       alignSelf: 'center',
@@ -157,6 +216,12 @@ const createStyles = () => {
       paddingBottom: 8,
       width: 250,
     },
-    footer: {padding: 8, alignItems: 'flex-end', alignSelf: 'center', justifyContent: 'flex-end'},
+    footer: {
+      padding: 8,
+      alignItems: 'flex-end',
+      alignSelf: 'center',
+      justifyContent: 'flex-end',
+    },
+    info: {flex: 1, marginLeft: 8},
   });
 };

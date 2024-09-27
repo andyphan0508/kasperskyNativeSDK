@@ -1,4 +1,10 @@
-import {DeviceEventEmitter, EmitterSubscription, NativeModules, Platform} from 'react-native';
+import {
+  DeviceEventEmitter,
+  EmitterSubscription,
+  NativeModules,
+  Platform,
+  PermissionsAndroid,
+} from 'react-native';
 
 const {KasperskyWebFilter} = NativeModules;
 
@@ -19,7 +25,7 @@ export const updateDatabase = (): Promise<any> => {
   });
 };
 
-export const kasperkeyWebFilter = (): Promise<any> => {
+export const activateFilter = (): Promise<any> => {
   // Check whether the device activate the webFilter
   return new Promise((resolve, reject) => {
     let result: EmitterSubscription;
@@ -36,4 +42,4 @@ export const kasperkeyWebFilter = (): Promise<any> => {
   });
 };
 
-export default {kasperkeyWebFilter, updateDatabase};
+export default {activateFilter, updateDatabase};

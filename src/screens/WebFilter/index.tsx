@@ -7,7 +7,7 @@ import {Button, Divider} from 'react-native-paper';
 
 import {useAppNavigation} from '../../navigation/AppNavigation';
 
-import {kasperkeyWebFilter, updateDatabase} from 'react-native-web-filter';
+import {activateFilter, updateDatabase} from 'react-native-web-filter';
 
 const WebFilter: React.FC = () => {
   const styles = createStyles();
@@ -25,7 +25,7 @@ const WebFilter: React.FC = () => {
 
   const onPress = async () => {
     try {
-      await kasperkeyWebFilter();
+      const resp = await activateFilter();
     } catch (error) {
       console.log(error);
     }
@@ -36,12 +36,17 @@ const WebFilter: React.FC = () => {
       <TouchableOpacity onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back-circle" size={40} color="#29CCB1" />
       </TouchableOpacity>
-      <Image source={images.browser} resizeMode="contain" style={{height: 200, width: '100%'}} />
+      <Image
+        source={images.browser}
+        resizeMode="contain"
+        style={{height: 200, width: '100%'}}
+      />
 
       <Text style={styles.title}>Lọc website</Text>
       <Text style={styles.description}>
-        Nguồn thông tin trên mạng rất đa dạng, không phải thông tin nào cũng đáng tin cậy. Để có thể đảm bảo được thông
-        tin chính xác, bạn cần lọc thông tin từ các trang web đáng tin cậy.
+        Nguồn thông tin trên mạng rất đa dạng, không phải thông tin nào cũng
+        đáng tin cậy. Để có thể đảm bảo được thông tin chính xác, bạn cần lọc
+        thông tin từ các trang web đáng tin cậy.
       </Text>
       <Divider style={{borderWidth: 0.25, marginVertical: 8}} />
 
@@ -55,7 +60,12 @@ export default WebFilter;
 const createStyles = () => {
   return StyleSheet.create({
     container: {padding: 16},
-    title: {fontSize: 30, fontWeight: 'bold', color: '#1D1D1B', marginVertical: 8},
+    title: {
+      fontSize: 30,
+      fontWeight: 'bold',
+      color: '#1D1D1B',
+      marginVertical: 8,
+    },
     description: {color: '#1D1D1B', lineHeight: 23},
   });
 };

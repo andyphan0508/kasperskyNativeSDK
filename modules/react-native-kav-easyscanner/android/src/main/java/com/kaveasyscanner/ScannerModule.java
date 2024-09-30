@@ -2,28 +2,18 @@ package com.kaveasyscanner;
 
 import static android.os.Build.VERSION.SDK_INT;
 
-
-import static androidx.core.app.ActivityCompat.startActivityForResult;
-
 import android.Manifest;
-import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageInfo;
 
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Environment;
-import android.provider.Settings;
 import android.util.Log;
-import android.view.View;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 import com.easyscanner.SdkInitListener;
@@ -58,7 +48,6 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 
 public class ScannerModule extends ReactContextBaseJavaModule implements SdkInitListener {
@@ -70,9 +59,6 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
     private Antivirus mAntivirusComponent;
     private Thread mScanThread;
     private AvCompletedListener mAvCompletedListener;
-    
-    private static final int ALL_FILES_PERMISSION_REQ_CODE = 4;
-    private static final int BACKGROUND_LOCATION_REQ_CODE = 5;
 
     ScannerModule(ReactApplicationContext context) {
         super(context);
@@ -85,29 +71,9 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
     }
 
     @ReactMethod
-    public void updateDatabase() throws SdkLicenseViolationException, IOException {
-        final Context context = getReactApplicationContext().getApplicationContext();
-        initializeSdk(context, ScannerModule.this);
-        Updater updater = Updater.getInstance();
-        try {
-            updater.updateAntivirusBases((i, i1) -> false);
-            sendEvent(getReactApplicationContext(), "Status", "Thành công");
-        } catch (SdkLicenseViolationException e) {
-            sendEvent(getReactApplicationContext(), "Status", "Thất bại" + e);
-            throw new RuntimeException(e);
+    public void displayName() {
+        Log.d("Note: ", "Kaspersky Scanner is ready to run");
 
-        }
-
-    }
-
-    @ReactMethod
-    public void requestPermissions(Activity activity) {
-        final int REQUEST_CODE = 101;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE);
-            }
-        }
     }
 
 
@@ -199,14 +165,12 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
 
     }
 
+    
 
-    private void startActivityForResult(Intent intent, int allFilesPermissionReqCode) {
-    }
 
     @ReactMethod
     public void onSdkInitialized(String mode) throws SdkLicenseViolationException {
         Log.i(TAG, "EasyScanner started");
-
 
         mScanThread = new Thread() {
             @Override
@@ -220,8 +184,10 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
                 }
 
                 /** Check permission */
-                ActivityCompat.checkSelfPermission(getCurrentActivity().getApplicationContext(),
+                boolean hasAccess = true;
+                int permission = ActivityCompat.checkSelfPermission(getCurrentActivity().getApplicationContext(),
                         Manifest.permission.ACCESS_COARSE_LOCATION);
+                hasAccess = (permission == PackageManager.PERMISSION_GRANTED);
 
                 /** Initialize scanning components*/
                 EasyScanner easyScanner = mAntivirusComponent.createEasyScanner();
@@ -323,7 +289,7 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
     }
 
     // Method to send log messages to JS via event emitter
-    private void sendEvent(ReactContext reactContext, String eventName, String message) {
+    private void sendEvent(ReactContext reactContext, String eventName, @Nullable String message) {
         List<String> messageList = Arrays.asList(message);
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit(eventName, message);

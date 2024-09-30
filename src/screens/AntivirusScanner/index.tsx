@@ -30,7 +30,7 @@ import colors from '../../themes/colors/colors';
 import RNFS from 'react-native-fs';
 
 const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
-  const bottomSheetRef = React.useRef<BottomSheet>(null);
+  const bottomSheetRef = React.useRef<any>(null);
 
   const styles = createStyles();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -94,11 +94,11 @@ const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
 
   const showPermissionSettingsDialog = () => {
     Alert.alert(
-      'Permission Required',
-      "You have denied the storage permission and selected 'Never Ask Again'. Please go to the app settings to enable it manually.",
+      'Quyền truy cập cần được cấp',
+      'Ứng dụng hiện tại đang bị chặn quyền, vui lòng kiểm qua quyền truy cập ứng dụng. Cho phép tất cả có thể được can thiệp vào tài nguyên cần thiết.',
       [
-        {text: 'Cancel', style: 'cancel'},
-        {text: 'Open Settings', onPress: () => Linking.openSettings()},
+        {text: 'Hủy bỏ', style: 'cancel'},
+        {text: 'Mở cài đặt', onPress: () => Linking.openSettings()},
       ],
       {cancelable: false},
     );

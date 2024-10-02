@@ -10,6 +10,7 @@ export const images = {
   device_unsecure: require('./no-smartphones.png'),
   shield: require('./shield.png'),
   browser: require('./browser.png'),
+  wifi: require('./wi-fi.png'),
 };
 
 export const icons = {

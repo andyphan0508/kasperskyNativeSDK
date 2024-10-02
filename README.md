@@ -20,4 +20,4 @@ _This is the sample of the project structure_
 
 ### Configure the linking modules
 
-If we install the module via e.g `@npm install <package-name> --save`. Since this project
+If we install the module via e.g `@npm install <package-name> --save`. Since this project is using for local. The priority is to connect these modules.

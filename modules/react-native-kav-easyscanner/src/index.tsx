@@ -1,6 +1,8 @@
-import {DeviceEventEmitter, EmitterSubscription, NativeModules} from 'react-native';
-
-import {ScanType} from './interface';
+import {
+  DeviceEventEmitter,
+  EmitterSubscription,
+  NativeModules,
+} from 'react-native';
 
 /** Set the permission on storage */
 
@@ -22,18 +24,18 @@ export const updateDatabase = (): Promise<any> => {
   });
 };
 
-export const kasperskyEasyScanner = (scanType: ScanType): Promise<any> => {
+export const kasperskyEasyScanner = (): Promise<any> => {
   const {KasperskyScannerSDK} = NativeModules;
 
   return new Promise((resolve, reject) => {
     let result: EmitterSubscription;
-    result = DeviceEventEmitter.addListener('AllResult', data => {
+    result = DeviceEventEmitter.addListener('ScanResult', data => {
       resolve(data);
       result.remove();
     });
 
     try {
-      KasperskyScannerSDK.onCreate(scanType);
+      KasperskyScannerSDK.onCreate();
     } catch (error) {
       reject(error);
     }

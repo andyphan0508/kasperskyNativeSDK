@@ -7,7 +7,8 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "create-library": "create-react-native-library"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
@@ -37,7 +38,8 @@
     "react-native-screens": "^3.34.0",
     "react-native-security-scan": "file:./modules\\react-native-security-scan",
     "react-native-vector-icons": "^10.2.0",
-    "react-native-web-filter": "file:./modules\\react-native-web-filter"
+    "react-native-web-filter": "file:./modules\\react-native-web-filter",
+    "react-native-wifi-scanner": "file:./modules/react-native-wifi-scanner"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

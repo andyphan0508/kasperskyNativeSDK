@@ -14,6 +14,7 @@ import CheckRoot from './src/screens/RootScanner';
 import About from './src/screens/About';
 import WebFilter from './src/screens/WebFilter';
 import AboutAntivirus from './src/screens/AntivirusScanner/About';
+import WifiScanner from './src/screens/WifiScanner';
 
 function App(): React.JSX.Element {
   const Stack = createNativeStackNavigator();
@@ -31,6 +32,7 @@ function App(): React.JSX.Element {
           <Stack.Screen name="Root" component={CheckRoot} />
           <Stack.Screen name="Filter" component={WebFilter} />
           <Stack.Screen name="AboutAntivirus" component={AboutAntivirus} />
+          <Stack.Screen name="WifiScanner" component={WifiScanner} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

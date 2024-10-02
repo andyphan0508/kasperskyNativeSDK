@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">WiFi Security Scan Example</string>
+    <string name="str_wifi_not_connected">Check is WiFi connected before use this feature</string>
+
+    <string name="str_wifi_status_safe">Wi-Fi network is SAFE</string>
+    <string name="str_wifi_status_not_safe">Wi-Fi network is UNSAFE</string>
+    <string name="str_wifi_status_unknown">Wi-Fi network is Unknown</string>
+    <string name="str_wifi_ksn_available">Kaspersky Security network is AVAILABLE</string>
+    <string name="str_wifi_ksn_unavailable">Kaspersky Security network is NOT AVAILABLE</string>
+    <string name="str_wifi_lic_expired">License is expired</string>
+    <string name="str_wifi_service_unavailable">Service unavailable</string>
+    <string name="accessibility_desc">Enable this service to make your antivirus unconquerable</string>
+</resources>

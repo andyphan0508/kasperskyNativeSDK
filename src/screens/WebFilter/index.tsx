@@ -13,7 +13,7 @@ const WebFilter: React.FC = () => {
   const styles = createStyles();
   const navigation = useAppNavigation();
 
-  /** This function will update the database of the Anti */
+  /** This function will update the database of the Anti-virus */
   const onUpdateDatabase = async () => {
     try {
       const resp = await updateDatabase();

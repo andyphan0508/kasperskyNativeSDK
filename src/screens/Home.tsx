@@ -25,6 +25,7 @@ export enum Type {
   antivirus = 'antivirus',
   root = 'root',
   filter = 'filter',
+  wifi = 'wifi',
 }
 
 interface DataInterface {
@@ -63,6 +64,12 @@ const Home: React.FC<StackScreenProps<any>> = ({navigation}) => {
       onPress: () => navigation.navigate('Filter'),
     },
     {
+      title: 'Quét Wifi',
+      description: 'Sử dụng Wifi an toàn cùng với Kaspersky',
+      type: Type.wifi,
+      onPress: () => navigation.navigate('WifiScanner'),
+    },
+    {
       title: 'Thông tin',
       description: 'Thông tin về ứng dụng',
       type: Type.information,
@@ -82,6 +89,8 @@ const Home: React.FC<StackScreenProps<any>> = ({navigation}) => {
         return <MaterialIcons name="security" size={30} color="white" />;
       case Type.filter:
         return <MaterialIcons name="back-hand" size={30} color="white" />;
+      case Type.wifi:
+        return <MaterialIcons name="wifi" size={30} color="white" />;
     }
   };
 

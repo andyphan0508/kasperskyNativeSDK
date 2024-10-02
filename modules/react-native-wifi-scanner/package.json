@@ -1,0 +1,14 @@
+{
+  "name": "react-native-wifi-scanner",
+  "version": "0.0.0",
+  "description": "Scanning wifi for malicious activity and prevent from harmfull one",
+  "main": "src/index",
+  "author": " <> ()",
+  "license": "UNLICENSED",
+  "homepage": "#readme",
+  "create-react-native-library": {
+    "type": "module-legacy",
+    "languages": "kotlin-objc",
+    "version": "0.41.2"
+  }
+}

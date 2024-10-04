@@ -14,25 +14,6 @@ const WifiScanner: React.FC<any> = () => {
   const navigation = useAppNavigation();
   const styles = createStyles();
 
-  const [state, setState] = React.useState<any>({
-    setScanUdsAllow: false,
-    setSkipRiskwareAdWare: false,
-    maxAppSize: 102,
-    udsScan: false,
-    skipRiskwareAdWare: false,
-    result: '',
-  });
-
-  const [skipRiskwareAdWare, setSkipRiskwareAdWare] =
-    React.useState<boolean>(false);
-  const [scanUds, setScanUds] = React.useState<boolean>(true);
-
-  React.useEffect(() => {
-    DeviceEventEmitter.addListener('Result', event => {
-      setState({...state, result: event});
-    });
-  }, []);
-
   const onFunction = async () => {
     try {
       await kasperskyWifiScanner();
@@ -40,10 +21,6 @@ const WifiScanner: React.FC<any> = () => {
       console.error(error);
     }
   };
-
-  const onEnableSkipRiskwareAdware = () =>
-    setSkipRiskwareAdWare(!skipRiskwareAdWare);
-  const onEnableScanUds = () => setScanUds(!scanUds);
 
   return (
     <View style={{padding: 8}}>

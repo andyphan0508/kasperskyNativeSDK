@@ -16,6 +16,7 @@ import {Button} from 'react-native-paper';
 import {
   kasperskyEasyScanner,
   updateDatabase,
+  getPermission,
 } from 'react-native-kav-easyscanner';
 
 import {ScanType} from 'react-native-kav-easyscanner/src/interface';
@@ -26,8 +27,6 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {StackScreenProps} from '@react-navigation/stack';
 import colors from '../../themes/colors/colors';
-
-import RNFS from 'react-native-fs';
 
 const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
   const bottomSheetRef = React.useRef<any>(null);
@@ -92,6 +91,14 @@ const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
     }
   };
 
+  const requestPermission = async () => {
+    try {
+      await getPermission();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const showPermissionSettingsDialog = () => {
     Alert.alert(
       'Quyền truy cập cần được cấp',
@@ -108,7 +115,9 @@ const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
   const onUpdateDatabase = async () => {
     try {
       const result = await updateDatabase();
+      console.log(result);
       setUpdateStatus(result === 'Thành công' ? true : false);
+      setIsLoading(false);
     } catch (error) {
       console.log(error);
       setError(true);
@@ -119,13 +128,14 @@ const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
     try {
       if (scanType === undefined) {
         setError(true);
+        setIsLoading(false);
         return;
       }
 
       setError(false);
       setIsLoading(true);
       const result = await kasperskyEasyScanner(scanType);
-
+      console.log(result);
       setIsResult(result);
       renderResult(result);
       setIsLoading(false);
@@ -206,7 +216,7 @@ const AntivirusChecker: React.FC<StackScreenProps<any>> = ({navigation}) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.updateSelection}
-          onPress={requestStoragePermission}>
+          onPress={requestPermission}>
           <Text style={{fontWeight: '700', fontSize: 18}}>Quyền truy cập</Text>
           <Text style={{color: colors.dark.primary}}>
             Cho phép quyền truy cập vào hệ thống

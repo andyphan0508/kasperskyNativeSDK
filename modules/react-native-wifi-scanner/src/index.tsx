@@ -1,4 +1,9 @@
-import {NativeModules, Platform} from 'react-native';
+import {
+  DeviceEventEmitter,
+  EmitterSubscription,
+  NativeModules,
+  Platform,
+} from 'react-native';
 
 const LINKING_ERROR =
   `The package 'react-native-wifi-scanner' doesn't seem to be linked. Make sure: \n\n` +
@@ -20,6 +25,13 @@ const WifiScanner = NativeModules.WifiScanner
 export const kasperskyWifiScanner = (): Promise<any> => {
   const {KasperskyWifiScanner} = NativeModules;
   return new Promise((resolve, reject) => {
+    let result: EmitterSubscription;
+    result = DeviceEventEmitter.addListener('WifiScanResult', data => {
+      resolve(data);
+      console.log(data);
+      result.remove();
+    });
+
     try {
       KasperskyWifiScanner.onCreate();
     } catch (error) {

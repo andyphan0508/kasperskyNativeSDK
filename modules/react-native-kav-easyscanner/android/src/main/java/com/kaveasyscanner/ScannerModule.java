@@ -1,17 +1,25 @@
 package com.kaveasyscanner;
 
 import static android.os.Build.VERSION.SDK_INT;
+import static android.provider.Settings.System.getString;
+
+import static androidx.core.app.ActivityCompat.startActivityForResult;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -44,8 +52,6 @@ import com.kavsdk.updater.Updater;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -59,6 +65,17 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
     private Antivirus mAntivirusComponent;
     private Thread mScanThread;
     private AvCompletedListener mAvCompletedListener;
+
+    /** Status on accessing file */
+    private boolean hasAccessToAllFiles = false;
+    private boolean hasLocationPermission = false;
+
+    /** Update permission code */
+    private static final int ALL_FILES_PERMISSION_REQ_CODE = 4;
+    private static final String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
 
     ScannerModule(ReactApplicationContext context) {
         super(context);
@@ -165,7 +182,58 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
 
     }
 
-    
+    /** Check update with a dedicated update function*/
+    @ReactMethod
+    public void updateDatabase() throws SdkLicenseViolationException, IOException {
+        initializeSdk(getCurrentActivity().getApplicationContext(), ScannerModule.this);
+        Updater updater = Updater.getInstance();
+
+        try {
+            updater.updateAntivirusBases((i, i1) -> false);
+            sendEvent(getReactApplicationContext(), "Status", "Thành công");
+        } catch (SdkLicenseViolationException e) {
+            sendEvent(getReactApplicationContext(), "Status", "Thất bại");
+            throw new RuntimeException(e);
+
+        }
+    }
+
+
+    @ReactMethod
+    public void getPermissionClick(View view) {
+        hasAccessToAllFiles = getFileAccessStatus();
+        if (!hasAccessToAllFiles && SDK_INT == 29) {
+            Log.i(TAG, "Requesting RW to Storage. API 29");
+            ActivityCompat.requestPermissions(
+                    (Activity) getCurrentActivity().getApplicationContext(),
+                    PERMISSIONS_STORAGE,
+                    ALL_FILES_PERMISSION_REQ_CODE
+
+            );
+        }
+
+        if (!hasAccessToAllFiles && SDK_INT >= Build.VERSION_CODES.R) {
+            Log.i(TAG, "Requesting Manage All Storage. API 30+");
+            requestAllFilesAccessPermission();
+        }
+
+        if (hasAccessToAllFiles) {
+//            appendLogln("", getString(R.string.all_files_access_status) + hasAccessToAllFiles);
+        }
+    }
+
+    public void requestAllFilesAccessPermission() {
+        try {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:" + getCurrentActivity().getPackageName()));
+            startActivityForResult(intent, ALL_FILES_PERMISSION_REQ_CODE);
+            System.out.println("Request Access file permission");
+        } catch (ActivityNotFoundException ignore) {
+
+        }
+    }
+
+    private void startActivityForResult(Intent intent, int allFilesPermissionReqCode) {
+    }
 
 
     @ReactMethod
@@ -309,8 +377,5 @@ public class ScannerModule extends ReactContextBaseJavaModule implements SdkInit
 
         return hasAccess;
     }
-
-
-
 
 }

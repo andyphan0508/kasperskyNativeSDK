@@ -142,7 +142,9 @@ const Home: React.FC<StackScreenProps<any>> = ({navigation}) => {
             flex: 1,
           }}>
           {!!DATA && (
-            <View style={{flex: 1, width: '100%', paddingHorizontal: 8}}>
+            <View
+              style={{flex: 1, width: '100%', paddingHorizontal: 8}}
+              id={'w'}>
               {DATA.map(item =>
                 renderItem(
                   item.title,

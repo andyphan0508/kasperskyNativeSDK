@@ -8,6 +8,7 @@ import {Button, Divider} from 'react-native-paper';
 import {useAppNavigation} from '../../navigation/AppNavigation';
 
 import {activateFilter, updateDatabase} from 'react-native-web-filter';
+import colors from '../../themes/colors/colors';
 
 const WebFilter: React.FC = () => {
   const styles = createStyles();
@@ -50,7 +51,11 @@ const WebFilter: React.FC = () => {
       </Text>
       <Divider style={{borderWidth: 0.25, marginVertical: 8}} />
 
-      <Button onPress={onUpdateDatabase}>Kiểm tra</Button>
+      <Button
+        onPress={onPress}
+        style={{backgroundColor: colors.dark.secondary1}}>
+        <Text style={{color: 'white', fontWeight: '700'}}>Lọc website</Text>
+      </Button>
     </View>
   );
 };

@@ -12,7 +12,6 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.kaspersky.components.urlchecker.UrlCategory;
 import com.kavsdk.KavSdk;
-import com.kavsdk.accessibility.OpenAccessibilitySettingsException;
 import com.kavsdk.antivirus.Antivirus;
 import com.kavsdk.antivirus.AntivirusInstance;
 import com.kavsdk.license.SdkLicense;
@@ -22,12 +21,15 @@ import com.kavsdk.license.SdkLicenseNetworkException;
 import com.kavsdk.license.SdkLicenseViolationException;
 import com.kavsdk.shared.iface.ServiceStateStorage;
 import com.kavsdk.updater.Updater;
+import com.kavsdk.webfilter.WebAccessHandler;
 import com.kavsdk.webfilter.WebFilterControl;
+import com.kavsdk.webfilter.WebFilterControlFactory;
 import com.kavsdk.webfilter.WebFilterControlFactoryImpl;
 import com.webmodules.AvCompletedListener;
 import com.webmodules.DataStorage;
 import com.webmodules.SdkInitListener;
 import com.webmodules.MyUrlFilterHandler;
+import com.webmodules.UrlFilterImpl;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,7 +74,8 @@ class WebFilterModule extends ReactContextBaseJavaModule implements SdkInitListe
 
     /** Update and initialize the SDK */
     @ReactMethod
-    public void onCreate() {
+    public void onCreate(Context context) {
+        super.initialize();
         Log.i(TAG, "Sample application started");
         new Thread(new Runnable() {
             public void run() {
@@ -138,50 +141,25 @@ class WebFilterModule extends ReactContextBaseJavaModule implements SdkInitListe
     }
 
     public void onSdkInitialized() {
-        Log.i(TAG, "WebFilter started");
 
-        try {
-            KavSdk.getAccessibility().openSettings();
-        } catch (OpenAccessibilitySettingsException e) {
-            e.printStackTrace();
-        }
-
-        int flags = WEB_FILTER_FLAGS;
-        // no wifi-proxy in mini-example
-        flags &= ~WebFilterControl.DISABLE_PROXY;
-        int webFilterPort = 8082;
-
-        WebFilterControl webFilterControl = null;
-        try {
-            webFilterControl = new WebFilterControlFactoryImpl().
-                    create(new MyUrlFilterHandler(), mContext, flags, LOCAL_HOST, webFilterPort, LOCAL_HOST, webFilterPort);
+        Log.i(TAG, "In startWebFilterWithAllAccess");
+        if (mWebFilter == null) {
+            WebFilterControlFactory factory = new WebFilterControlFactoryImpl();
+            try {
+                mWebFilter = factory.create((WebAccessHandler) (new UrlFilterImpl()), getCurrentActivity().getApplicationContext());
+            } catch (SdkLicenseViolationException e) {
+                e.printStackTrace();
+            }
 
             // Deny next categories to access
-            webFilterControl.setCategoryEnabled(UrlCategory.PornoAndErotic);
-            webFilterControl.setCategoryEnabled(UrlCategory.SocialNet);
-            webFilterControl.setCategoryEnabled(UrlCategory.Phishing);
-            webFilterControl.setCategoryEnabled(UrlCategory.Malware);
+            mWebFilter.setCategoriesEnabled(new UrlCategory[] {UrlCategory.SocialNet, UrlCategory.Malware, UrlCategory.Phishing});
 
-            webFilterControl.enable(true);
-        } catch(SdkLicenseViolationException ex) {
-            if (mOpCompletedListener != null) {
-                mOpCompletedListener.onAvCompleted(ex.getMessage());
-            }
+
+            mWebFilter.enable(true);
+            Log.i(TAG, "In startWebFilter. Finish ALl OK");
+
+
         }
-
-        mWebFilter = webFilterControl;
-
-        mThread = new Thread() {
-            @Override
-            public void run() {
-                Log.i(TAG, "WebFilter init complete");
-                if (mOpCompletedListener != null) {
-                    mOpCompletedListener.onAvCompleted("Now open Google Chrome:\n\nSocial networks must be blocked,\nporn sites must be blocked,\nany malware URLs must be blocked\nany other sites are not affected");
-                }
-                Log.i(TAG, "WebFilter finished");
-            }
-        };
-        mThread.start();
     }
 
     private enum InitStatus {
@@ -219,6 +197,8 @@ class WebFilterModule extends ReactContextBaseJavaModule implements SdkInitListe
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit(eventName, message);
     }
+
+    /** Push the result to the React Native layer */
     private void sendStringEvent(ReactContext reactContext, String eventName,  String message) {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit(eventName, message);

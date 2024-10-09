@@ -1,17 +1,21 @@
 package com.wifiscanner;
 
-
-
-
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 
 import android.content.pm.PackageManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 
+import wifimodules.SdkEventstListener;
 import wifimodules.SdkInitListener;
 import wifimodules.AvCompletedListener;
 import wifimodules.DataStorage;
@@ -31,6 +35,9 @@ import com.kavsdk.license.SdkLicenseNetworkException;
 import com.kavsdk.license.SdkLicenseViolationException;
 
 import com.kavsdk.shared.iface.ServiceStateStorage;
+import com.kavsdk.webfilter.WebFilterControl;
+import com.kavsdk.wifi.WifiCheckResult;
+import com.kavsdk.wifi.WifiReputation;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +51,12 @@ public class WifiScannerModule extends ReactContextBaseJavaModule implements Sdk
   private Antivirus mAntivirusComponent;
   private Thread mScanThread;
   private Context mContext;
+
+  private Antivirus mAntivirus;
+  private Handler mHandler;
+  private SdkEventstListener mExtListener;
+  WebFilterControl mWebFilter;
+  private boolean isSdkReady;
 
   private AvCompletedListener mAvCompletedListener;
 
@@ -150,17 +163,62 @@ public class WifiScannerModule extends ReactContextBaseJavaModule implements Sdk
 
 
 
-  @Override
-  public void onSdkInitialized() {
 
+  @ReactMethod
+    public boolean onSdkInitialized () {
+      boolean isNetworkSafe = false;
+
+      WifiManager wifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+      WifiInfo wi = wifiManager.getConnectionInfo();
+      if (wi != null) {
+          if (ActivityCompat.checkSelfPermission(getCurrentActivity().getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+              // TODO: Consider calling
+              //    ActivityCompat#requestPermissions
+              // here to request the missing permissions, and then overriding
+              //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+              //                                          int[] grantResults)
+              // to handle the case where the user grants the permission. See the documentation
+              // for ActivityCompat#requestPermissions for more details.
+            return isNetworkSafe;
+          }
+          for (ScanResult scanResult : wifiManager.getScanResults()) {
+          if (wi.getSSID().contains(scanResult.SSID)) {
+            Log.w(TAG, "We're connected to " + scanResult.SSID);
+            Object wifiSecurity = getScanResultSecurity(scanResult);
+            Log.w(TAG, "Encryption is " + wifiSecurity);
+//                    if (wifiSecurity.equals(WifiSecurityAuthMode.OPEN)) {
+//                        return false;
+//                    }
+
+            break;
+          }
+        }
+
+        try {
+          final WifiReputation wifiReputation = new WifiReputation(mContext.getApplicationContext());
+          WifiCheckResult wifiCheckResult = wifiReputation.checkCurrentNetwork();
+          Log.i(TAG, "Wifi Safe Status: " + wifiReputation.isCurrentNetworkSafe() + " " + wifiCheckResult.getBssid());
+          Log.i(TAG, "KSN Wifi check result: " + wifiCheckResult.getVerdict().name());
+          isNetworkSafe = wifiReputation.isCurrentNetworkSafe();
+          if (mExtListener != null) {
+            mExtListener.onEvent(TAG, "Wifi Safe Status: " + wifiReputation.isCurrentNetworkSafe());
+            mExtListener.onEvent(TAG, "BSSID: " + wifiCheckResult.getBssid());
+            mExtListener.onEvent(TAG, "KSN Wifi check result: " + wifiCheckResult.getVerdict().name());
+          }
+        } catch (SdkLicenseViolationException | IOException e) {
+          e.printStackTrace();
+        }
+      }
+
+    return isNetworkSafe;
   }
 
-    @ReactMethod
-    public void onSdkInitialized (String mode) throws SdkLicenseViolationException {
-    }
+  private Object getScanResultSecurity(ScanResult scanResult) {
+      return null;
+  }
 
 
-    public void onInitSuccess () {
+  public void onInitSuccess () {
 
     }
 
